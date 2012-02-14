@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="hello">Hello World, PrabolaActivity!</string>
+    <string name="app_name">פרבולה</string>
+    <string name="text_a">a = </string>
+    <string name="text_b">b = </string>
+    <string name="text_c">c = </string>
+    <string name="text_r">min</string>
+    <string name="text_x1">x1</string>
+    <string name="text_x2">x2</string>
+    <string name="text_copyright">\u00a9 Eyal Rosin</string>
+
+</resources>
