@@ -4,9 +4,9 @@ import java.util.Locale;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnKeyListener;
@@ -16,17 +16,34 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class ParabolaActivity extends Activity implements TextToSpeech.OnInitListener {
+import com.facebook.android.DialogError;
+import com.facebook.android.Facebook;
+import com.facebook.android.Facebook.DialogListener;
+import com.facebook.android.FacebookError;
+
+// public class ParabolaActivity extends Activity implements TextToSpeech.OnInitListener {
+public class ParabolaActivity extends Activity  {
     /** Called when the activity is first created. */ 
-	private TextToSpeech mTts;
+//	private TextToSpeech mTts;
+	Facebook facebook = new Facebook("233083120115651");
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         
-        mTts = new TextToSpeech(this, this);
+//        mTts = new TextToSpeech(this, this);
 		
+        facebook.authorize(this, new String[] { "email", "publish_checkins" }, new DialogListener() {
+            public void onComplete(Bundle values) {}
+
+            public void onFacebookError(FacebookError error) {}
+
+            public void onError(DialogError e) {}
+
+            public void onCancel() {}
+        });
+        
 
         final EditText edittext_a = (EditText) findViewById(R.id.edittext_a);
         edittext_a.setOnKeyListener(new OnKeyListener() {
@@ -107,20 +124,28 @@ public class ParabolaActivity extends Activity implements TextToSpeech.OnInitLis
 
     }
 
-    // Implements TextToSpeech.OnInitListener.
-    public void onInit(int status) {
-        // status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
-//        if (status == TextToSpeech.SUCCESS) {
-//            // Set preferred language to US english.
-//            // Note that a language may not be available, and the result will indicate this.
-//            int result = mTts.setLanguage(Locale.US);
-    	mTts.setLanguage(Locale.UK);
-    	String myText1 = "Hi Noga";
-		String myText2 = "How are you";
-		mTts.speak(myText1, TextToSpeech.QUEUE_FLUSH, null);
-		mTts.speak(myText2, TextToSpeech.QUEUE_ADD, null);
-        }
+//    // Implements TextToSpeech.OnInitListener.
+//    public void onInit(int status) {
+//        // status can be either TextToSpeech.SUCCESS or TextToSpeech.ERROR.
+////        if (status == TextToSpeech.SUCCESS) {
+////            // Set preferred language to US english.
+////            // Note that a language may not be available, and the result will indicate this.
+////            int result = mTts.setLanguage(Locale.US);
+//    	mTts.setLanguage(Locale.UK);
+//    	String myText1 = "Hi Noga";
+//		String myText2 = "How are you";
+//		mTts.speak(myText1, TextToSpeech.QUEUE_FLUSH, null);
+//		mTts.speak(myText2, TextToSpeech.QUEUE_ADD, null);
+//        }
     
+    
+    
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        facebook.authorizeCallback(requestCode, resultCode, data);
+    }
 
 
 }
