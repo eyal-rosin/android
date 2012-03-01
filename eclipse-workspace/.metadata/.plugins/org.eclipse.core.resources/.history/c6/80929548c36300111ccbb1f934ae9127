@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/background"
+    >
+	<include
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/header" />
+	
+	<LinearLayout
+	    android:orientation="vertical"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    android:layout_weight="1"	    
+	    android:paddingLeft="20dp"
+	    android:paddingRight="20dp"
+	    android:paddingTop="10dp"
+	    android:paddingBottom="10dp"
+	    >
+	    <LinearLayout		    
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="1"	    
+		    android:gravity="center_vertical"
+		    >
+		    <LinearLayout		    
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    android:layout_weight="1"	    
+			    android:gravity="center_horizontal"
+			    android:orientation="vertical"
+			    >
+			    <Button		    
+				    android:layout_width="wrap_content"
+				    android:layout_height="wrap_content"
+				    android:background="@drawable/pair_bag"
+				    android:onClick="pairBag"				    
+				    />
+			    <TextView		    
+				    android:layout_width="wrap_content"
+				    android:layout_height="wrap_content"				    
+				    android:text="@string/pair_bag"
+				    android:textSize="14sp"
+				    android:textColor="@color/normal_text"
+				    />
+				    
+			</LinearLayout>
+		    <LinearLayout		    
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    android:layout_weight="1"	    
+			    android:gravity="center_horizontal"
+			    android:orientation="vertical"
+			    >
+			    <Button		    
+				    android:layout_width="wrap_content"
+				    android:layout_height="wrap_content"
+				    android:background="@drawable/unpair_bag"
+				    android:onClick="unpairBag"				    
+				    />
+			    <TextView		    
+				    android:layout_width="wrap_content"
+				    android:layout_height="wrap_content"				    
+				    android:text="@string/unpair_bag"
+				    android:textSize="14sp"
+				    android:textColor="@color/normal_text"
+				    />
+				    
+			</LinearLayout>
+		</LinearLayout>	    
+	    
+	    <LinearLayout		    
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_weight="1"	    
+		    android:gravity="center_vertical"
+		    >
+	    	<LinearLayout		    
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    android:layout_weight="1"	    
+			    android:gravity="center_horizontal"
+			    android:orientation="vertical"
+			    >
+			    <Button		    
+				    android:layout_width="wrap_content"
+				    android:layout_height="wrap_content"
+				    android:background="@drawable/edit_account"
+				    android:onClick="manageAccount"				    
+				    />
+			    <TextView		    
+				    android:layout_width="wrap_content"
+				    android:layout_height="wrap_content"				    
+				    android:text="@string/edit_account"
+				    android:textSize="14sp"
+				    android:textColor="@color/normal_text"
+				    />
+			    
+				    
+			</LinearLayout>
+		    <LinearLayout		    
+			    android:layout_width="fill_parent"
+			    android:layout_height="wrap_content"
+			    android:layout_weight="1"	    
+			    android:gravity="center_horizontal"
+			    android:orientation="vertical"
+			    >
+			    <Button		    
+				    android:layout_width="wrap_content"
+				    android:layout_height="wrap_content"
+				    android:background="@drawable/manage_bags"
+				    android:onClick="viewActivities"				    
+				    />
+			    
+			    <TextView		    
+				    android:layout_width="wrap_content"
+				    android:layout_height="wrap_content"				    
+				    android:text="@string/view_activities"
+				    android:textSize="14sp"
+				    android:textColor="@color/normal_text"
+				    />
+				    
+			</LinearLayout>
+		</LinearLayout>	    
+		
+	    <LinearLayout		    
+		    android:layout_width="fill_parent"
+		    android:layout_height="fill_parent"
+		    android:layout_weight="1"	    
+		    android:gravity="center_horizontal"
+		    android:visibility="gone"
+		    >
+	    	<LinearLayout		    
+			    android:layout_width="fill_parent"
+			    android:layout_height="fill_parent"
+			    android:layout_weight="1"	    
+			    android:gravity="center_horizontal"
+			    android:orientation="vertical"
+			    >
+			    <Button		    
+				    android:layout_width="wrap_content"
+				    android:layout_height="wrap_content"
+				    android:background="@drawable/manage_services"
+				    android:onClick="menuButtonClicked"				    
+				    />
+			    
+			    <TextView		    
+				    android:layout_width="wrap_content"
+				    android:layout_height="wrap_content"				    
+				    android:text="@string/manage_services"
+				    android:textSize="14sp"
+				    android:textColor="@color/normal_text"
+				    />
+				    
+			</LinearLayout>
+		    
+		</LinearLayout>	    
+	        
+	</LinearLayout>   
+	
+	<FrameLayout	    
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"	        	    
+	    >	
+	    <include
+        	layout="@layout/footer"
+        	/>
+	</FrameLayout>      
+	    
+</LinearLayout>

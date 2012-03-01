@@ -1,0 +1,86 @@
+package com.tagabag.activities;
+
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
+import android.widget.EditText;
+
+import com.tagabag.MyProgressDialog;
+import com.tagabag.R;
+import com.tagabag.models.LoginObject;
+import com.tagabag.network.LoginNetworkTask;
+import com.tagabag.parsers.BaseParser;
+
+public class Login extends GetSessionActivity {
+	
+	EditText emailBox, passwordBox;		
+	//FileManagement fm= new FileManagement(this);
+	Handler handler = new Handler();	
+	MyProgressDialog pd;
+	
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.login);
+        emailBox=(EditText) findViewById(R.id.registration_email);
+        passwordBox=(EditText) findViewById(R.id.registration_password);         
+    }
+    
+    
+    public void buttonClicked(View v) {
+    	String email=emailBox.getText().toString();
+    	String password=passwordBox.getText().toString();
+    	if (email.equals("") || password.equals("")) { 
+    		customDialog(getString(R.string.please_note), getString(R.string.missing_param),false);    		
+    	    return;
+    	}    		
+    	    	
+    	showPd();
+    	
+    	new LoginThread(email, password).start();
+    	
+    }
+    
+    
+    
+    
+    
+    class LoginThread extends Thread {
+    	String email, password;
+    	public LoginThread(String email, String password) {
+    		this.email = email;
+    		this.password = password;
+    	}
+    	
+		public void run() {
+
+			LoginObject obj;
+			
+			LoginNetworkTask loginNetworkTask;
+			
+			loginNetworkTask = new LoginNetworkTask(email, password);
+				
+			obj =(LoginObject) loginNetworkTask.getResult();
+			if (obj == null) {
+				cancelPd();
+				customDialog(getString(R.string.connection_error_title), getString(R.string.connection_error),false);				
+				return;
+			}		
+			else if (obj.mStatus == BaseParser.STATUS_OK) {				
+				loadServerData(email, password, null, obj.mSessionId);				
+				return;
+			} 
+			else if (obj.mStatus == BaseParser.INVALID_CREDENTIALS) {
+				cancelPd();
+				customDialog(getString(R.string.login_failed_title), getString(R.string.login_failed),false);
+			}
+			
+
+
+		}
+	}    
+
+    
+    
+}
+

@@ -1,0 +1,5 @@
+package com.tagabag.models;
+
+public class LoginObject extends Status{
+	public String mSessionId;
+}

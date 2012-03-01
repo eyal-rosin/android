@@ -1,0 +1,41 @@
+package com.tagabag.parsers;
+
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import android.util.Log;
+
+
+public class ReverseGeoParser extends BaseParser {
+	
+		
+	public String parse(String text) throws JSONException
+	{									
+		JSONObject obj = new JSONObject(text);
+		JSONArray jsonAddressesArray = obj.getJSONArray("results");						
+		
+		JSONObject formattedAddressJson = jsonAddressesArray.getJSONObject(0);
+		String result = formattedAddressJson.getString("formatted_address");
+		JSONArray addressComponenents = formattedAddressJson.getJSONArray("address_components");
+		
+		for (int i=0; i<addressComponenents.length(); i++) {
+			JSONArray types = addressComponenents.getJSONObject(i).getJSONArray("types");
+			if (hasLocality(types))
+				return addressComponenents.getJSONObject(i).getString("long_name");
+			
+		}
+		
+		return null;
+	}
+	
+	
+	public boolean hasLocality(JSONArray types) throws JSONException {
+		for (int j=0; j<types.length(); j++)
+			if (types.getString(j).equals("locality"))
+				return true;
+		return false;
+	}
+}
+

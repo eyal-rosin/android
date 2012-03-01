@@ -1,0 +1,48 @@
+package com.tagabag.activities;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+
+import com.tagabag.R;
+
+public class MenuActivity extends BaseActivity{
+	/*
+     * create the menu on startup
+     */
+    @Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+	    MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.menu.app_menu, menu);
+	    return true;
+	}
+    
+    /*
+     * do actions according to menu clicks
+     */    
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+	    // Handle item selection
+		int clickedMenuItem=item.getItemId();
+		Intent intent;
+		Log.d("audio","name="+getClass().getName());
+	    if (clickedMenuItem==R.id.menu_nfc_pairing && !getClass().getName().equals("com.google.zxing.client.android.finder.NfcSaveTag")) {	    	
+	    	intent = new Intent(this,NfcSaveTag.class);	        	  
+	    } else if (clickedMenuItem==R.id.menu_qr_pairing && !getClass().getName().equals("com.google.zxing.client.android.finder.QrSaveTag")) {
+	    	intent = new Intent(this,QrSaveTag.class);	    
+	    } else if (clickedMenuItem==R.id.menu_main && !getClass().getName().equals("com.google.zxing.client.android.finder.SelectReader")) {
+	    	intent = new Intent(this,SelectReader.class);
+	    } else if (clickedMenuItem==R.id.menu_history && !getClass().getName().equals("com.google.zxing.client.android.finder.History")) {
+	    	intent = new Intent(this,History.class);	    	
+	    } else
+	    	return true;
+	    
+	    startActivity(intent);
+	    	                 
+	    return true;	    
+	}
+	
+}

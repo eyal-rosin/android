@@ -1,0 +1,36 @@
+package com.tagabag.network;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
+import com.tagabag.network.ServerConnection.Method;
+import com.tagabag.parsers.ReverseGeoParser;
+
+public class ReverseGeoNetworkTask extends NetworkTask{
+	double mLat, mLon;
+	
+	final static String PARAM_LATLON = "latlng";
+	final static String PARAM_SENSOR = "sensor";
+	
+	public ReverseGeoNetworkTask(double lat, double lon) {
+		mLat=lat;
+		mLon=lon;
+		
+		parser = new ReverseGeoParser();
+	}
+	
+	protected String callServer() throws IOException{
+		
+		List<NameValuePair> pairs= new ArrayList<NameValuePair>();			
+		
+		pairs.add(new BasicNameValuePair(PARAM_LATLON, mLat+","+mLon));
+		pairs.add(new BasicNameValuePair(PARAM_SENSOR, "true"));
+		
+		return connectToServer(Method.GET,GOOGLE_REVERSE_GEO_URL, pairs);
+	}
+	
+}

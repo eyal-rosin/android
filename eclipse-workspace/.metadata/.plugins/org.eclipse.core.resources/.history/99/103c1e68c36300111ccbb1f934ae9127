@@ -1,0 +1,113 @@
+package com.tagabag.activities;
+
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
+
+import com.tagabag.App;
+import com.tagabag.R;
+import com.tagabag.db.FileManagement;
+import com.tagabag.models.LoginObject;
+import com.tagabag.network.SignupNetworkTask;
+import com.tagabag.parsers.BaseParser;
+
+public class Registration extends GetSessionActivity {
+	public static int ZXING_REQUEST_CODE=1;
+	static final String TAG = "SelectReader";
+	EditText emailBox, passwordBox, nameBox;	
+	
+	
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.registration);
+        emailBox=(EditText) findViewById(R.id.registration_email);
+        passwordBox=(EditText) findViewById(R.id.registration_password);
+        nameBox=(EditText) findViewById(R.id.registration_name);
+        
+    }
+    
+    LoginObject status;
+    public void buttonClicked(View v) {
+    	final String name=nameBox.getText().toString();
+    	final String email=emailBox.getText().toString();
+    	final String password=passwordBox.getText().toString();
+    	if (email.equals("") || password.equals("")) { 
+    		customDialog(getString(R.string.please_note), getString(R.string.missing_param),false);    		
+    	    return;
+    	}    		
+    	
+    	if (!isEmailValid(email)) {
+    		customDialog(getString(R.string.error), getString(R.string.invalid_email),false);    		
+    	    return;
+    	}
+    	
+    	
+    	try {
+    		//response=ServerConnection.register(email, password);
+    		new Thread() {
+    			public void run() {
+    				SignupNetworkTask signupNetworkTask = new SignupNetworkTask(email, password, name);
+    				status = (LoginObject) signupNetworkTask.getResult();
+    				
+    				if (status == null) {
+    					customDialog(getString(R.string.connection_error_title), getString(R.string.connection_error),false);
+    				}
+    				else if (status.mStatus == BaseParser.STATUS_OK) {
+    					
+    					customDialog(getString(R.string.success), getString(R.string.registration_complete), new Runnable() {
+    		    			public void run() {
+    		    				//save email and password locally
+    		    				SharedPreferences settings = getSharedPreferences(App.MAIN_PREFS,0);
+    		    				SharedPreferences.Editor editor = settings.edit();
+    						    editor.putString(App.EMAIL_PREF, email);
+    						    editor.putString(App.PASSWORD_PREF, password);
+    						    editor.putString(App.NAME_PREF, name);
+    						    editor.putString(App.SEESSION_ID_PREF, status.mSessionId);
+    						    
+    						    editor.commit();
+    		    				
+    		    				Intent intent = new Intent(Registration.this, InitialMenu.class);
+    		    				startActivity(intent);
+    		    			}
+    		    		});
+    		    	} 
+    				else if (status.mStatus == BaseParser.USER_EXISTS) {
+    		    		customDialog(getString(R.string.error), getString(R.string.user_exists),false);
+    		    		return;
+    		    	}
+    				else {
+    					customDialog(getString(R.string.connection_error_title), getString(R.string.connection_error),false);
+    		    		return;
+    		    	}
+    			}
+    		}.start();
+    		
+			
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    		customDialog(getString(R.string.connection_error_title), getString(R.string.connection_error),false);
+    		return;
+    	} 
+    	
+    	
+    	
+    	FileManagement fm=new FileManagement(this);
+    	fm.createFile(email, password, "false", "false");
+    	
+    }
+    
+    
+    public boolean isEmailValid(String email) {
+    	if( !(email.contains("@") && email.contains(".")) ) {					
+			return false;
+		//check email validity
+		} else if(email.indexOf("@") > email.lastIndexOf(".") || email.lastIndexOf(".")==email.length()-1) {
+			return false;
+		}
+    	return true;
+    }
+}
+

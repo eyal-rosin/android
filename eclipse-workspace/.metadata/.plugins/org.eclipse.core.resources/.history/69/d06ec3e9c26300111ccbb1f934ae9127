@@ -1,0 +1,221 @@
+package com.tagabag.activities;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.os.Bundle;
+import android.text.format.DateFormat;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnTouchListener;
+import android.widget.LinearLayout;
+import android.widget.RadioButton;
+import android.widget.TextView;
+
+import com.tagabag.App;
+import com.tagabag.MyAsyncTask;
+import com.tagabag.R;
+import com.tagabag.db.NewDataBase;
+import com.tagabag.models.Bag;
+import com.tagabag.models.Event;
+import com.tagabag.models.OnlineObject;
+import com.tagabag.models.RemovedBag;
+import com.tagabag.models.SocialNetworks;
+import com.tagabag.network.AddBagNetworkTask;
+import com.tagabag.network.OnlineObjectNetworkTask;
+import com.tagabag.network.RemoveBagNetworkTask;
+import com.tagabag.network.SendEventNetworkTask;
+
+public class InitialMenu extends BaseActivity {
+	public static final String TAG = "InitialMenu";
+	App app;
+	Intent intent;
+	LinearLayout touchBagFrame;
+	LinearLayout manageAccountFrame;
+	View touchYourBagButton;
+	View manageAccount;
+	TextView touchYourBag;
+	TextView goAhead;
+	TextView manageAccountText;
+	NewDataBase db;
+	@Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        
+        setContentView(R.layout.initial_menu);
+        app = (App) getApplication();
+        
+        db = new NewDataBase(this);
+	    Cursor c = db.getAllCursor(NewDataBase.BAGS_TABLE_NAME, null);
+	    
+		if (db.getBags(c).size() ==0) {			
+			finish();
+			startActivity(new Intent(this,MainMenu.class));
+			db.close();
+			return;
+		}
+		db.close();
+		
+		if (!app.isNfcState)
+			((RadioButton) findViewById(R.id.radio_qr)).setChecked(true);
+		
+			
+		sendOldEventsToServer();
+		
+        touchYourBagButton = findViewById(R.id.touchYourBagButton);
+        manageAccount = findViewById(R.id.manageAccount);
+        touchBagFrame = (LinearLayout) findViewById(R.id.touchBagFrame);
+        manageAccountFrame = (LinearLayout) findViewById(R.id.manageAccountFrame);
+        //manageAccount
+        touchYourBag =(TextView) findViewById(R.id.touchYourBag);
+        goAhead =(TextView) findViewById(R.id.goAhead);
+        manageAccountText=(TextView) findViewById(R.id.manageAccountText);
+        
+        touchBagFrame.setOnTouchListener(new OnTouchListener() {
+
+			public boolean onTouch(View view, MotionEvent me) {
+				if (me.getAction() == me.ACTION_DOWN) {
+					touchYourBagButton.setBackgroundResource(R.drawable.touch_your_bag2);
+					touchYourBag.setTextColor(getResources().getColor(R.color.yellow));
+					goAhead.setTextColor(getResources().getColor(R.color.yellow));
+				}
+				else if (me.getAction() == me.ACTION_UP) {
+					touchYourBagButton.setBackgroundResource(R.drawable.touch_your_bag1);
+					touchYourBag.setTextColor(getResources().getColor(R.color.normal_text));
+					goAhead.setTextColor(getResources().getColor(R.color.normal_text));
+				}
+				return false;
+			}
+        	
+        });
+        
+        manageAccountFrame.setOnTouchListener(new OnTouchListener() {
+
+			public boolean onTouch(View view, MotionEvent me) {
+				if (me.getAction() == me.ACTION_DOWN) {
+					manageAccount.setBackgroundResource(R.drawable.manage_account2);
+					manageAccountText.setTextColor(getResources().getColor(R.color.yellow));					
+				}
+				else if (me.getAction() == me.ACTION_UP) {					
+					manageAccount.setBackgroundResource(R.drawable.manage_account1);
+					manageAccountText.setTextColor(getResources().getColor(R.color.normal_text));
+				}
+				return false;
+			}
+        	
+        });
+
+	}
+	
+	
+	public void touchBagClicked(View v) {		
+		if (app.isNfcState) {
+			intent = new Intent(this,NfcSearching.class);
+			app.state = App.ACTION_UNKNOWN;
+			startActivity(intent);
+		}
+		else {
+			Intent intent = new Intent("com.google.zxing.client.android.TAG_A_BAG_SCAN");
+			//Intent intent = new Intent(this,com.google.zxing.client.android.CaptureActivity.class);
+	        intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+	        startActivityForResult(intent, ZXING_REQUEST_CODE);
+		}
+	}
+	
+	
+	public void manageAccountClicked(View v) {
+		intent = new Intent(this,MainMenu.class);
+		startActivity(intent);
+	}
+	
+	
+	public void sendOldEventsToServer() {
+		if (!isOnline())
+			return;
+		
+		NewDataBase db = new NewDataBase(this);
+		List<OnlineObject> list = db.getUnsentObjects();
+		ArrayList<OnlineObjectNetworkTask> tasks = new ArrayList();
+		Log.d(TAG,"list.size="+list.size());
+		int i=0;
+		for (OnlineObject obj: list) {
+			
+			Calendar c = Calendar.getInstance();
+			c.setTimeInMillis(obj.time);
+			String time=DateFormat.format("hh:mm:ss", c).toString();
+			
+			if (obj instanceof Event) {
+												
+				final Event event = (Event)obj;
+				
+				//send social network messages
+				new Thread() {
+					public void run() {
+						SharedPreferences settings = getSharedPreferences(App.MAIN_PREFS,0);
+						(new SocialNetworks(InitialMenu.this)).sendStatusMessages(settings, event);						
+					}
+				}.start();
+				
+				SendEventNetworkTask task = new SendEventNetworkTask(app.getSessionId(), event);
+				tasks.add(task);
+				
+				Log.d(TAG,i+") Event at "+time +"  isSent="+event.isSentToServer);
+				
+			}
+			else if (obj instanceof Bag) {
+				Bag bag = (Bag) obj;
+				AddBagNetworkTask task = new AddBagNetworkTask(app.getSessionId(), bag);
+				tasks.add(task);
+				Log.d(TAG,i+") Bag at "+time+"  isSent="+bag.isSentToServer);
+			}
+			else if (obj instanceof RemovedBag) {
+				Bag bag = new Bag();
+				bag.tagId = ((RemovedBag)obj).tagId;
+				RemoveBagNetworkTask task = new RemoveBagNetworkTask(app.getSessionId(), bag);
+				tasks.add(task);				
+				Log.d(TAG,i+") RemoveBag at "+time);
+			}
+			i++;			
+			
+		}
+		new MyAsyncTask(this).execute(tasks);
+		db.close();
+		
+	}
+	
+	
+	
+	@Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (requestCode == ZXING_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                String content = intent.getStringExtra("SCAN_RESULT");
+                String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
+                
+                Cursor c=db.getActiveBagsByTagIdCursor(content, Bag.TAG_TYPE_QR);        		
+        		ArrayList<Bag> bags = db.getBags(c);
+        		Intent newIntent;
+        		if (bags.size()==0) {
+        			newIntent = new Intent(this, BagNotYours.class);			
+        			startActivity(newIntent);
+        		}
+        		else {        			        			
+        			newIntent = new Intent(this, Tagging.class);
+        			newIntent.putExtra(App.BAG_EXTRA, bags.get(0));        			
+        			startActivity(newIntent);
+        		}
+        		return;
+            }
+        }
+	}
+	
+	
+		
+}

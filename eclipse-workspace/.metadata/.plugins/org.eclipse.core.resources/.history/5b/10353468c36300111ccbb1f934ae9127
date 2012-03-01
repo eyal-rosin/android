@@ -1,0 +1,19 @@
+package com.tagabag.models;
+
+import java.io.Serializable;
+
+public class OnlineObject implements Serializable, Comparable {
+	public boolean isSentToServer=false;
+	public long time;
+	
+	public int compareTo(Object another) {
+		OnlineObject obj = (OnlineObject) another;
+		if (time<obj.time)
+			return -1;
+		if (time>obj.time)
+			return 1;
+		
+		return 0;
+		
+	}
+}

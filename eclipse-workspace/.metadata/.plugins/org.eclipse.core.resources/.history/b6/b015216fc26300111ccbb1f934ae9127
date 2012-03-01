@@ -1,0 +1,39 @@
+package com.tagabag.activities;
+
+import android.app.Activity;
+import android.os.Bundle;
+import android.text.Html;
+import android.util.Log;
+import android.widget.RadioButton;
+import android.widget.TextView;
+
+import com.tagabag.App;
+import com.tagabag.R;
+
+public class BagNotYours extends BaseActivity {	
+	static final String TAG = "notYours";
+	TextView failureMessage;
+	App app;
+	//FileManagement fm= new FileManagement(this);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.bag_unknown);
+		failureMessage = (TextView) findViewById(R.id.failure_message);
+		app = (App) getApplication();
+		
+
+		if (!app.isNfcState)
+			((RadioButton) findViewById(R.id.radio_qr)).setChecked(true);
+
+		String color = "#0089b6";
+		if (app.mAddress!=null) {
+			String s = String.format(getString(R.string.failure_message), "<font color=\""+color+"\">"+app.mAddress.getLocality()+",</font><br />");
+			Log.d(TAG,"s="+s);
+			failureMessage.setText(Html.fromHtml(s));
+		}
+		
+	}    
+
+}
+

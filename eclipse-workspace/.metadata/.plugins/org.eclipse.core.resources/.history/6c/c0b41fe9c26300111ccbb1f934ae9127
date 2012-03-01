@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/background"
+    android:gravity="center"
+    android:orientation="vertical" >
+
+    <include
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/header" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_marginLeft="28dp"
+        android:layout_marginRight="28dp"
+        android:layout_marginTop="10dp"
+        android:layout_weight="1"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:id="@+id/pairFrame"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="5dp"
+                android:text="@string/bag_name"
+                android:textColor="@color/normal_text"
+                android:textSize="14sp" />
+
+            <EditText
+                android:id="@+id/bagName"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/edittext_bg"
+                android:imeOptions="actionNext"
+                android:inputType="textEmailAddress"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
+                android:textColor="@color/edittext"
+                android:textSize="14sp" />
+
+            <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="10dp"
+                android:paddingLeft="5dp"
+                android:text="@string/bag_color"
+                android:textColor="@color/normal_text"
+                android:textSize="14sp" />
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="10dp" >
+
+                <ImageButton
+                    android:id="@+id/bagBlack"
+                    android:onClick="onBagClicked"
+                    android:layout_width="fill_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="1"
+                    android:scaleType="fitXY"                    
+                    android:background="@drawable/bag_black" />
+
+                <ImageButton
+                    android:id="@+id/bagBrown"
+                    android:onClick="onBagClicked"
+                    android:layout_width="fill_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="1"
+                    android:scaleType="fitXY"
+                    android:background="@drawable/bag_brown" />
+
+                <ImageButton
+                    android:id="@+id/bagGreen"
+                    android:onClick="onBagClicked"
+                    android:layout_width="fill_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="1"
+                    android:scaleType="fitXY"
+                    android:background="@drawable/bag_green" />
+
+                <ImageButton
+                    android:id="@+id/bagPurple"
+                    android:onClick="onBagClicked"
+                    android:layout_width="fill_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="1"
+                    android:scaleType="fitXY"
+                    android:background="@drawable/bag_purple" />
+
+                <ImageButton
+                    android:id="@+id/bagRed"
+                    android:onClick="onBagClicked"
+                    android:layout_width="fill_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="1"
+                    android:scaleType="fitXY"
+                    android:background="@drawable/bag_red" />
+
+                <ImageButton
+                    android:id="@+id/bagBlue"
+                    android:onClick="onBagClicked"
+                    android:layout_width="fill_parent"
+                    android:layout_height="40dp"
+                    android:layout_marginTop="0dp"
+                    android:layout_weight="1"
+                    android:scaleType="fitXY"                    
+                    android:background="@drawable/bag_blue" />
+            </LinearLayout>
+
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/bag_button"
+                android:onClick="addBagClicked"
+                android:paddingLeft="15dp"
+                android:text="@string/add_bag"
+                android:textColor="@color/button"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/unpairFrame"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone" >
+
+            <TextView
+                android:id="@+id/unpairbagName"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:paddingLeft="5dp"
+                android:textColor="@color/normal_text"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/unpairButton"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:background="@drawable/bag_button"
+                android:onClick="unpairBag"
+                android:paddingLeft="15dp"
+                android:text="@string/unpair"
+                android:textColor="@color/button"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/existingBag"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:paddingLeft="5dp"
+            android:text="@string/existing_bag"
+            android:textColor="@color/normal_text"
+            android:textSize="14sp" />
+
+        <ListView
+            android:id="@+id/list"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/list_bg"
+            android:cacheColorHint="#00000000"
+            android:fadingEdge="none"
+            android:paddingBottom="7dp"
+            android:paddingLeft="4dp"
+            android:paddingRight="3dp"
+            android:paddingTop="7dp" />
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <include layout="@layout/footer" />
+    </FrameLayout>
+
+</LinearLayout>

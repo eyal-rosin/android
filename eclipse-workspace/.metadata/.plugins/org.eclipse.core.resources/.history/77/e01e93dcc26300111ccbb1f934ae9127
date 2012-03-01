@@ -1,0 +1,74 @@
+package com.tagabag.db;
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStreamReader;
+
+import org.json.JSONObject;
+
+import android.content.Context;
+import android.util.Log;
+
+public class FileManagement {	
+	public static enum Type{EMAIL,PASSWORD,TWITTER,FACEBOOK};
+	private Context context;
+	private String fileName;
+	private String[] stringTypes=new String[]{"email","password","facebook","twitter"};
+	
+	public FileManagement(Context context) {
+		this.context=context;
+		this.fileName="settings";				
+	}
+	
+	
+	public String getInfo(Type type) {
+		JSONObject jObject;
+		String info;
+		if (type==Type.EMAIL)
+			info=stringTypes[0];
+		else if (type==Type.PASSWORD)
+			info=stringTypes[1];
+		else if (type==Type.TWITTER)
+			info=stringTypes[2];
+		else
+			info=stringTypes[3];
+		/* try to get the username from file */
+		try{
+	    	  FileInputStream fIn = context.openFileInput(fileName);
+			  InputStreamReader isr = new InputStreamReader(fIn);
+			  char[] inputBuffer = new char[1000];
+			  isr.read(inputBuffer);
+			  String fileContent = new String(inputBuffer);
+			  jObject = new JSONObject(fileContent);
+		/* problem with the file - return the first url in the list */	  			  			  
+		} catch (Exception ee) {
+			  ee.printStackTrace();
+			  Log.d("error","error:"+ee);			  			  
+			  return "";		    	  		    	  
+	    }		
+		try {
+			return jObject.getString(info);
+		} catch (Exception e) {
+			return "";
+		}
+		
+	}
+	
+	public void createFile(String email, String password, String twitter, String facebook) {
+		try {
+			  FileOutputStream fos = context.openFileOutput(fileName, Context.MODE_PRIVATE);
+			  JSONObject json=new JSONObject();
+			  json.put(stringTypes[0], email);
+			  json.put(stringTypes[1], password);
+			  json.put(stringTypes[2], twitter);
+			  json.put(stringTypes[3], facebook);
+			 
+			  fos.write(json.toString().getBytes());			  
+			  fos.close();
+			  Log.d("write","created:"+json.toString());
+		  } catch (Exception ee) {
+			  Log.d("write","not created:"+ee);
+		  }
+	}
+	
+}

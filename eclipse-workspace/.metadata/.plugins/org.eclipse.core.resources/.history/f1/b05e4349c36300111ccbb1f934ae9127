@@ -1,0 +1,123 @@
+package com.tagabag.activities;
+
+import java.util.ArrayList;
+
+import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.drawable.AnimationDrawable;
+import android.nfc.Tag;
+import android.os.Bundle;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+
+import com.tagabag.App;
+import com.tagabag.R;
+import com.tagabag.db.FileManagement;
+import com.tagabag.db.NewDataBase;
+import com.tagabag.models.Bag;
+import com.tagabag.models.SocialNetworks;
+
+
+public class NfcSearching extends NfcForegroundDispatchActivity {
+	static final String TAG = "ViewTag";
+
+	NewDataBase db;
+	
+	ImageView animation;
+
+	String message;
+	App app;
+	AnimationDrawable frameAnimation;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.nfc_searching);
+
+		app = (App) getApplication();
+		app.isNfcState = true;
+	
+		animation = (ImageView)findViewById(R.id.animation);
+		
+		
+		findViewById(R.id.radio_qr).setEnabled(false);
+
+
+		animation.postDelayed(new Runnable() {
+			public void run() {
+				initAnimation();
+			}
+		}, 100);
+
+		Intent intent = getIntent();
+
+		message = intent.getStringExtra("message");
+		db=new NewDataBase(this);
+
+		app.getAddress(null);	
+
+	}
+
+
+
+	@Override
+	public void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);		
+		Cursor c=db.getActiveBagsByTagIdCursor(hexContent, Bag.TAG_TYPE_NFC);
+		Intent newIntent;
+		ArrayList<Bag> bags = db.getBags(c);
+		
+		if (app.state == App.STATE_PAIR) {			
+			newIntent = new Intent(this, SelectBag.class);
+			newIntent.putExtra(App.TAG_ID_EXTRA, hexContent);
+			startActivity(newIntent);
+			return;
+		}
+		else if (app.state == App.STATE_UNPAIR) {
+			if (bags.size()!=0) {
+				newIntent = new Intent();
+				newIntent.putExtra(App.BAG_EXTRA, bags.get(0));
+				setResult(RESULT_OK, newIntent);
+				finish();
+				return;
+			}
+		}
+		
+		
+		if (bags.size()==0) {
+			newIntent = new Intent(this, BagNotYours.class);			
+			startActivity(newIntent);
+		}
+		else {
+			
+			
+			newIntent = new Intent(this, Tagging.class);
+			newIntent.putExtra(App.BAG_EXTRA, bags.get(0));
+			
+			startActivity(newIntent);
+		}
+		return;
+
+
+
+	}
+
+	void initAnimation() {    	
+		animation.setImageBitmap(null);
+		animation.setBackgroundResource(R.anim.searching_animation);
+
+		frameAnimation = (AnimationDrawable) animation.getBackground();
+
+		frameAnimation.start();
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		frameAnimation.stop();
+		if (db!=null)
+			db.close();
+	}
+
+}
+

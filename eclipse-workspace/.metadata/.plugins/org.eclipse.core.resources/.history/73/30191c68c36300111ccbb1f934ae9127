@@ -1,0 +1,175 @@
+package com.tagabag.activities;
+
+import java.net.URLDecoder;
+import java.util.List;
+
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.location.Location;
+import android.location.LocationManager;
+import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TableLayout;
+import android.widget.TextView;
+
+import com.google.zxing.client.android.db.DataBase;
+import com.tagabag.R;
+import com.tagabag.db.FileManagement;
+import com.tagabag.models.SocialNetworks;
+import com.tagabag.network.ServerConnection;
+
+public class QrReader extends MenuActivity{
+	public static int ZXING_REQUEST_CODE=1;
+	static final String TAG = "SelectReader";	
+	DataBase db;
+	TextView unknownTag;
+	TextView name,address,tel;
+	TableLayout tagDetails;
+	LinearLayout socialNetwordsFrame;
+	double lat=0, lon=0;
+	Handler mHandler=new Handler();
+	
+	FileManagement fm= new FileManagement(this);
+    SocialNetworks sn;       
+    
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.qr_reader);
+        socialNetwordsFrame=(LinearLayout) findViewById(R.id.social_networds_frame);
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        List<String> list=locationManager.getProviders(true);
+        String selectedProvider=null;
+        for (String provider:list) {
+        	if (provider!=null) {
+        		selectedProvider=provider;
+        		break;
+        	}
+        }
+        
+        if (selectedProvider!=null) {
+        	Location location=locationManager.getLastKnownLocation (selectedProvider);
+        	if (location!=null) {
+	        	lon=location.getLongitude();
+				lat=location.getLatitude();
+        	}
+        }
+        
+       
+        
+        
+        unknownTag=(TextView) findViewById(R.id.unknown_tag);
+        name=(TextView) findViewById(R.id.name);
+        address=(TextView) findViewById(R.id.address);
+        tel=(TextView) findViewById(R.id.tel);
+        tagDetails=(TableLayout) findViewById(R.id.tag_details);
+        db=new DataBase(this);
+		Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+        //intent.setPackage("com.google.zxing.client.android");
+        //Intent intent = new Intent(this,com.google.zxing.client.android.CaptureActivity.class);
+        intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+        startActivityForResult(intent, ZXING_REQUEST_CODE);
+    }
+    
+    
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if (requestCode == ZXING_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                String content = intent.getStringExtra("SCAN_RESULT");
+                String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
+                Cursor c=db.getQrCodeByContentCursor(content);
+                if (db.getQrCodes(c).length>0) {
+                	setTitle("This is my luggage!");
+                	socialNetwordsFrame.setVisibility(View.VISIBLE);
+                	 new Thread() {
+                     	public void run() {
+                     		try {
+                     			final String s=ServerConnection.setSuccessfulPairing(fm.getInfo(FileManagement.Type.EMAIL), 
+                     				ServerConnection.TYPE_QR,
+                     				lat,lon);
+                     			
+                     		} catch (Exception e) {
+                     			e.printStackTrace();
+                     		}
+                     	}
+                     }.start();
+                	
+            		
+                } else {        	
+                	socialNetwordsFrame.setVisibility(View.GONE);
+                	setTitle("This luggage is not mine!");
+                }
+                
+                String[] tagDetailsString=getTagDetails(content);
+                if  (tagDetailsString==null) {
+                	tagDetails.setVisibility(View.GONE);
+                	unknownTag.setVisibility(View.VISIBLE);
+                } else {
+                	name.setText(tagDetailsString[0]);
+                	address.setText(tagDetailsString[1]);
+                	tel.setText(tagDetailsString[2]);
+                	
+                	
+                }
+                	
+                	
+                // Handle successful scan
+            } else if (resultCode == RESULT_CANCELED) {
+                finish();
+            }
+            db.close();
+        }
+    }
+    
+    public String[] getTagDetails(String content) {    	
+    	content=URLDecoder.decode(content);
+    	Log.d("audio","content="+content);
+    	String[] s0=content.split("; ");
+    	if (s0.length!=3)
+    		return null;
+    	String[] s1=s0[0].split("name:");
+    	String[] s2=s0[1].split("address:");
+    	String[] s3=s0[2].split("Tel:");
+    	Log.d("audio","s1.length="+s1.length);
+    	Log.d("audio","s2.length="+s2.length);
+    	Log.d("audio","s3.length="+s3.length);
+    	if (s1.length!=2 && s2.length!=2 && s3.length!=2)
+    		return null;
+    	String a1="",a2="",a3="";
+    	try {
+    		a1=s1[1];    		
+    	} catch (Exception e) {}
+    	
+    	try {
+    		a2=s2[1];    		
+    	} catch (Exception e) {}
+    	
+    	try {
+    		a3=s3[1];    		
+    	} catch (Exception e) {}
+    	
+    	return new String[] {a1,a2,a3};
+    }
+    
+    
+    public void onTwitterClicked(View v) {
+    	if (sn==null)
+    		sn=new SocialNetworks(this);    	
+		
+    }
+    
+    public void onFacebookClicked(View v) {
+    	if (sn==null)
+    		sn=new SocialNetworks(this);
+		sn.getFacebookAuthentication(null);
+    }
+    
+    
+        
+}
+

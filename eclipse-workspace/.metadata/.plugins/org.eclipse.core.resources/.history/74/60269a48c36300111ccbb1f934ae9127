@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TableRow xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+<TextView  
+    android:id="@+id/date"
+    android:layout_width="wrap_content"  
+    android:layout_height="wrap_content"         
+    android:gravity="left"
+    />
+<TextView  
+    android:id="@+id/type"
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content"         
+    android:gravity="left"
+    android:layout_marginLeft="15dp"
+    />
+<TextView  
+    android:id="@+id/location"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"         
+    android:gravity="left"
+    android:layout_marginLeft="15dp"
+    />
+
+</TableRow>            

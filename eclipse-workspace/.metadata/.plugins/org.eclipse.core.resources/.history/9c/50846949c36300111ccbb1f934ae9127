@@ -1,0 +1,164 @@
+package com.tagabag.network;
+
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+
+import android.util.Log;
+
+
+public class ServerConnection {
+	static String TAG="server";
+	enum Method{POST,GET};
+	public static String TYPE_QR="type_qr";
+		public static String TYPE_NFC="type_nfc";
+	public static final String BASE_URL="http://luggage-finder.appspot.com";
+	public static final String GOOGLE_REVERSE_GEO_URL = "http://maps.googleapis.com/maps/api/geocode/json";
+	
+	
+	private static String connectToServer(Method method, String relativeUrl, List<NameValuePair> pairs) throws IOException,ServerConnectionError{
+		String response;
+		if (method==Method.POST)
+			response=connectToServerPostMethod(relativeUrl,pairs);
+		else
+			response=connectToServerGetMethod(relativeUrl,pairs);
+		Log.d(TAG,"url="+relativeUrl+"\n"+"response="+response);
+		return response;
+	}
+		
+	private static String connectToServerPostMethod(String url, List<NameValuePair> pairs) throws IOException,ServerConnectionError{				
+		DefaultHttpClient httpclient = new DefaultHttpClient();				
+		HttpPost post;
+		
+		post = new HttpPost(url);
+		
+		post.setEntity(new UrlEncodedFormEntity(pairs));
+		HttpResponse response = httpclient.execute(post);				      			
+		if (response.getStatusLine().getStatusCode()!=200) {
+			//throw new ServerConnectionError("connectToServer",response.getStatusLine().getStatusCode()+"");
+		}
+		
+		return EntityUtils.toString(response.getEntity());
+
+	}
+	
+	private static String connectToServerGetMethod(String relativeUrl, List<NameValuePair> pairs) throws IOException,ServerConnectionError{		
+		String params="";
+		NameValuePair nameValuePair;
+		
+		for (int i=0;i<pairs.size();i++) {
+			nameValuePair=pairs.get(i);
+			if (i==0) {
+				params+="?";
+			} else
+				params+="&";
+			Log.d("ViewTag","value="+nameValuePair.getValue());
+			params+=nameValuePair.getName()+"="+URLEncoder.encode(nameValuePair.getValue(),"UTF-8");
+		}
+		
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+	    
+	    
+		HttpGet httpget;
+		String url;
+		
+		url=relativeUrl+params;			
+		
+		Log.i(TAG,"url="+url);
+		
+		httpget = new HttpGet(url);		
+		Header[] hs=httpget.getAllHeaders();
+		
+		HttpResponse response;	    	    
+	    response = httpclient.execute(httpget);
+	    if (response.getStatusLine().getStatusCode()!=200) {
+			//throw new ServerConnectionError("connectToServer",response.getStatusLine().getStatusCode()+"");
+		}
+	    
+	    String result= EntityUtils.toString(response.getEntity());
+	    Log.e(TAG,"response="+result);
+        return result;        
+	}
+	
+	/***************/
+	public static String register(String email, String password) throws IOException,ServerConnectionError{
+		String url=BASE_URL+"/registration";
+		List<NameValuePair> pairs= new ArrayList<NameValuePair>();
+		pairs.add(new BasicNameValuePair("email",email));
+		pairs.add(new BasicNameValuePair("password",password));
+		return connectToServer(Method.GET,url,pairs);		
+	}
+	
+	public static String login(String email, String password) throws IOException,ServerConnectionError{
+		String url=BASE_URL+"/login";
+		List<NameValuePair> pairs= new ArrayList<NameValuePair>();
+		pairs.add(new BasicNameValuePair("email",email));
+		pairs.add(new BasicNameValuePair("password",password));
+		return connectToServer(Method.GET,url,pairs);		
+	}
+	
+	public static String setSuccessfulPairing(String email, String type, double lat, double lon) throws IOException,ServerConnectionError{
+		String url=BASE_URL+"/setSuccessfulPairing";
+		List<NameValuePair> pairs= new ArrayList<NameValuePair>();
+		pairs.add(new BasicNameValuePair("email",email));
+		pairs.add(new BasicNameValuePair("type",type));
+		pairs.add(new BasicNameValuePair("lat",lat+""));
+		pairs.add(new BasicNameValuePair("long",lon+""));
+		return connectToServer(Method.GET,url,pairs);		
+	}
+	
+	
+	public static String getHistory(String email) throws IOException,ServerConnectionError{
+		String url=BASE_URL+"/getAllSuccessfulPairings";
+		List<NameValuePair> pairs= new ArrayList<NameValuePair>();
+		pairs.add(new BasicNameValuePair("email",email));		
+		return connectToServer(Method.GET,url,pairs);		
+	}
+	
+	
+	/**********************************************************************************************************/
+	public static String getReverseGeoCoding (double lat, double lon) throws IOException, ServerConnectionError
+	{			
+		List<NameValuePair> pairs= new ArrayList<NameValuePair>();
+		
+		pairs.add(new BasicNameValuePair("latlng",lat+","+lon));
+		pairs.add(new BasicNameValuePair("sensor", "true"));
+		return connectToServer(Method.GET,GOOGLE_REVERSE_GEO_URL, pairs);
+	}
+	
+	
+
+	
+	
+	public static class ServerConnectionError extends Exception {
+		  String location, errorCode;		  
+		  public ServerConnectionError(String location, String errorCode) {
+		    super(location);     // call super class constructor
+		    this.location = location;  // save message
+		    this.errorCode = errorCode;
+		  }
+		  
+		  public String getLocation() {
+		    return location;
+		  }
+		  
+		  public String getErrorCode() {
+			  return errorCode;
+		  }
+		  	
+	}
+	
+		
+
+}

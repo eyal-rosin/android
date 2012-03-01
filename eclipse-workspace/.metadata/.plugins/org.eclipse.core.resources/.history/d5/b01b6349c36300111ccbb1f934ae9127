@@ -1,0 +1,36 @@
+package com.tagabag.network;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
+import com.tagabag.network.ServerConnection.Method;
+import com.tagabag.parsers.EventsParser;
+
+public class GetEventsNetworkTask extends NetworkTask{
+	final String PARAM_SESSION_ID = "session_id";
+	
+	String relativeUrl = "/get_events";
+	
+
+	String mSessionId;
+
+	public GetEventsNetworkTask(String sessionId) {						
+			mSessionId = sessionId;			
+			parser = new EventsParser();		
+	}
+
+
+	protected String callServer() throws IOException{
+
+		List<NameValuePair> pairs= new ArrayList<NameValuePair>();			
+
+		pairs.add(new BasicNameValuePair(PARAM_SESSION_ID, mSessionId));
+		
+		return connectToServer(Method.GET,NEW_BASE_URL+relativeUrl, pairs);
+	}
+
+}

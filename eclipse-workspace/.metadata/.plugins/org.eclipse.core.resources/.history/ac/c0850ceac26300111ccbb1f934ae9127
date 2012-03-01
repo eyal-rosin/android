@@ -1,0 +1,48 @@
+package com.tagabag.network;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
+import com.tagabag.models.Bag;
+import com.tagabag.network.ServerConnection.Method;
+import com.tagabag.parsers.StatusParser;
+
+public class AddBagNetworkTask extends OnlineObjectNetworkTask{
+	String relativeUrl = "/add_bag";
+
+	String mSessionId;
+	public Bag mBag;
+
+	
+	public AddBagNetworkTask(String sessionId, Bag bag) {		
+		mSessionId = sessionId;
+		mBag = bag;
+		onlineObject = bag;
+		parser = new StatusParser();
+	}
+
+
+	protected String callServer() throws IOException{
+
+		List<NameValuePair> pairs= new ArrayList<NameValuePair>();			
+
+		String PARAM_SESSION_ID = "session_id";
+		String PARAM_BAG_NAME = "bag_name";
+		String PARAM_BAG_COLOR ="color";
+		String PARAM_TAG_TYPE ="tag_type";
+		String PARAM_TAG_ID ="tag_id";
+
+		pairs.add(new BasicNameValuePair(PARAM_SESSION_ID, mSessionId));
+		pairs.add(new BasicNameValuePair(PARAM_BAG_NAME, mBag.mName+""));
+		pairs.add(new BasicNameValuePair(PARAM_BAG_COLOR, mBag.mColor+""));
+		pairs.add(new BasicNameValuePair(PARAM_TAG_TYPE, mBag.tagType+""));
+		pairs.add(new BasicNameValuePair(PARAM_TAG_ID, mBag.tagId+""));
+				
+		return connectToServer(Method.GET,NEW_BASE_URL+relativeUrl, pairs);
+	}
+
+}

@@ -1,0 +1,60 @@
+package com.tagabag.network;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
+import com.tagabag.network.ServerConnection.Method;
+import com.tagabag.parsers.LoginParser;
+import com.tagabag.parsers.ReverseGeoParser;
+import com.tagabag.parsers.StatusParser;
+
+public class SignupNetworkTask extends NetworkTask{
+	String relativeUrl = "/secure/registration";
+
+	String mName, mEmail, mPassword, mFacebookToken;
+
+
+	final static String PARAM_NAME = "name";
+	final static String PARAM_EMAIL = "email";
+	final static String PARAM_PASSWORD = "password";
+	final static String PARAM_FACEBOOK_TOKEN = "facebook_token" ;
+
+
+	public SignupNetworkTask(String email, String password, String name) {
+		mName = name;
+		mEmail = email;
+		mPassword = password;
+		parser = new LoginParser();
+	}
+
+
+	public SignupNetworkTask(String facebookToken, String name) {
+		mName = name;
+		mFacebookToken = facebookToken;		
+		parser = new LoginParser();
+	}
+
+	protected String callServer() throws IOException{
+
+		List<NameValuePair> pairs= new ArrayList<NameValuePair>();			
+
+		pairs.add(new BasicNameValuePair(PARAM_NAME, mName));
+		
+		//login using email
+		if (mEmail!=null) {
+			pairs.add(new BasicNameValuePair(PARAM_EMAIL, mEmail));
+			pairs.add(new BasicNameValuePair(PARAM_PASSWORD, mPassword));
+		}
+		else {
+			//login using facebook
+			pairs.add(new BasicNameValuePair(PARAM_FACEBOOK_TOKEN, mFacebookToken));
+		}
+
+		return connectToServer(Method.GET,SECURE_BASE_URL+relativeUrl, pairs);
+	}
+
+}

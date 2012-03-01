@@ -1,0 +1,21 @@
+package com.tagabag.db;
+
+import android.provider.BaseColumns; 
+
+
+public interface Constants extends BaseColumns {
+	public static final String NFC_TABLE_NAME = "nfcTags";
+	public static final String QR_TABLE_NAME = "qrCodes";	
+	public static final String SETTINGS_TABLE_NAME = "settings";	
+	// Columns in the database
+	public static final String NFC_HEX_CONTENT = "nfc_content";
+	public static final String QR_CODE_CONTENT = "qr_code_content";
+	
+	public static final String SETTINGS_CONTENT = "settings_content";
+	public static final String SETTINGS_NAME = "settings_name";
+	
+	public static final String SETTINGS_NAME_NFC_METHOD = "nfc_method";
+	public static final String NFC_METHOD_READ = "read";
+	public static final String NFC_METHOD_PAIR = "pair";
+	public static final String NFC_METHOD_UNKNOWN = "unknown";		
+}

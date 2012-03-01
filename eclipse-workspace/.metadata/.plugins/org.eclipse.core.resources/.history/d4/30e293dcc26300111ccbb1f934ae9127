@@ -1,0 +1,446 @@
+package com.tagabag.db;
+
+import static android.provider.BaseColumns._ID;
+
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
+import com.tagabag.App;
+import com.tagabag.models.Bag;
+import com.tagabag.models.Event;
+import com.tagabag.models.OnlineObject;
+import com.tagabag.models.RemovedBag;
+
+public class NewDataBase extends SQLiteOpenHelper { 
+
+	//table names
+	public static final String BAGS_TABLE_NAME = "bags";
+	public static final String REMOVED_BAGS_TABLE_NAME = "removed_bags";	
+	public static final String EVENTS_TABLE_NAME = "events";	
+
+	/*
+	 *  Columns in the database
+	 */
+	//removedBag columns
+	public static final String REMOVED_BAG_TAG_ID = "tag_id";
+	public static final String REMOVED_BAG_TIME = "time";
+
+	//bag columns
+	public static final String BAG_NAME = "bag_name";
+	public static final String BAG_COLOR = "bag_color";
+	public static final String BAG_IS_SENT_TO_SERVER = "is_sent";
+	public static final String BAG_IS_DELETED = "is_deleted";
+	public static final String BAG_TAG_ID = "tag_content_id";
+	public static final String BAG_TAG_TYPE = "tag_type";
+	public static final String BAG_ADDED_TIME = "time";
+
+	//events columns	
+	public static final String EVENT_TAG_ID = "tag_content_id";
+	public static final String EVENT_BAG_NAME = "bag_name";
+	public static final String EVENT_BAG_COLOR = "bag_color";
+	public static final String EVENT_TIME = "time";
+	public static final String EVENT_ACTION_TYPE = "action_type";
+	public static final String EVENT_LAT = "lat";
+	public static final String EVENT_LON = "lon";
+	public static final String EVENT_ADDRESS = "address";
+	public static final String EVENT_SOCIAL_NETWORK_MESSAGE = "sn_message";
+	public static final String EVENT_SHARE_FACEBOOK = "facebook";
+	public static final String EVENT_SHARE_TWITTER = "twitter";
+	public static final String EVENT_SHARE_LINKEDIN = "linkedin";
+	public static final String EVENT_IS_SENT_TO_SERVER= "is_sent";
+
+
+
+	private static final String DATABASE_NAME = "tagabag.db"; 
+	private static final int DATABASE_VERSION = 9;
+
+	String TAG="sql";
+
+	/** Create a helper object for the Events database */
+	public NewDataBase(Context ctx) { 
+		super(ctx, DATABASE_NAME, null, DATABASE_VERSION);		
+	}
+
+
+	@Override 
+	public void onCreate(SQLiteDatabase db) {		
+		String q="CREATE TABLE " + BAGS_TABLE_NAME + " (" 
+		+ _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " 								
+		+ BAG_NAME + " TEXT NOT NULL,"
+		+ BAG_IS_SENT_TO_SERVER + " BOOLEAN,"
+		+ BAG_IS_DELETED + " BOOLEAN,"
+		+ BAG_TAG_ID + " TEXT NOT NULL,"
+		+ BAG_TAG_TYPE + " INTEGER,"
+		+ BAG_ADDED_TIME + " INTEGER,"
+		+ BAG_COLOR + " INTEGER);";
+		db.execSQL(q);
+
+		
+		q="CREATE TABLE " + REMOVED_BAGS_TABLE_NAME + " (" 
+		+ _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+		+ REMOVED_BAG_TIME + " INTEGER,"
+		+ REMOVED_BAG_TAG_ID + " TEXT NOT NULL);";
+		db.execSQL(q);
+
+		
+
+		q="CREATE TABLE " + EVENTS_TABLE_NAME + " (" 
+		+ _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " 							
+		+ EVENT_TIME + " INTEGER,"
+		+ EVENT_ACTION_TYPE + " INTEGER,"
+		+ EVENT_LAT + " FLOAT,"
+		+ EVENT_LON + " FLOAT,"
+		+ EVENT_ADDRESS + " TEXT,"
+		+ EVENT_TAG_ID + " TEXT NOT NULL,"
+		+ EVENT_BAG_NAME + " TEXT NOT NULL,"
+		+ EVENT_BAG_COLOR + " INTEGER,"
+		+ EVENT_SOCIAL_NETWORK_MESSAGE + " TEXT,"
+		+ EVENT_IS_SENT_TO_SERVER + " BOOLEAN,"
+		+ EVENT_SHARE_FACEBOOK + " BOOLEAN,"
+		+ EVENT_SHARE_TWITTER + " BOOLEAN,"
+		+ EVENT_SHARE_LINKEDIN+ " BOOLEAN);";				
+		db.execSQL(q);
+
+	}
+
+
+	@Override 
+	public void onUpgrade(SQLiteDatabase db, int oldVersion,int newVersion) { 
+		createNewDb(db);
+	}
+	
+	public void createNewDb(SQLiteDatabase db) {
+		if (db == null)
+			db = getReadableDatabase();
+		
+		db.execSQL("DROP TABLE IF EXISTS " + EVENTS_TABLE_NAME); 		
+		db.execSQL("DROP TABLE IF EXISTS " + BAGS_TABLE_NAME);
+		db.execSQL("DROP TABLE IF EXISTS " + REMOVED_BAGS_TABLE_NAME);
+		onCreate(db);
+	}
+
+	public void addBag(Bag bag) { 
+		Log.d(TAG,"color="+bag.mColor+" tagId="+bag.tagId+" name="+bag.mName);
+		ContentValues values = new ContentValues(); 
+		values.put(BAG_NAME, URLEncoder.encode(bag.mName));
+		values.put(BAG_COLOR, bag.mColor);
+		values.put(BAG_IS_SENT_TO_SERVER, bag.isSentToServer);
+		values.put(BAG_IS_DELETED, bag.isDeleted);
+		values.put(BAG_TAG_ID, bag.tagId);		
+		values.put(BAG_TAG_TYPE, bag.tagType);
+		values.put(BAG_ADDED_TIME, System.currentTimeMillis());
+		
+		SQLiteDatabase db = getReadableDatabase();
+		db.insertOrThrow(BAGS_TABLE_NAME, null, values);
+	}
+
+
+	public void removeBag(Bag bag) { 		
+		ContentValues values = new ContentValues(); 
+		values.put(REMOVED_BAG_TAG_ID, bag.tagId);		
+		values.put(REMOVED_BAG_TIME, System.currentTimeMillis());
+		SQLiteDatabase db = getReadableDatabase();
+		db.insertOrThrow(REMOVED_BAGS_TABLE_NAME, null, values);
+		
+		String q="UPDATE "+BAGS_TABLE_NAME +
+		" SET "+BAG_IS_DELETED+" = 1" +
+		" WHERE "+BAG_TAG_ID+" = '"+bag.tagId+"'";				
+		db.execSQL(q);
+	}
+
+
+	public void addEvent(Event event) { 
+		// Insert a new record into the data source.     	 
+
+		ContentValues values = new ContentValues(); 
+		values.put(EVENT_TAG_ID, event.bag.tagId);
+		values.put(EVENT_BAG_NAME, event.bag.mName);
+		values.put(EVENT_BAG_COLOR, event.bag.mColor);
+		values.put(EVENT_TIME, event.time);
+		values.put(EVENT_ACTION_TYPE, event.action_type);
+		values.put(EVENT_LAT, event.lat);
+		values.put(EVENT_LON, event.lon);
+		values.put(EVENT_ADDRESS, event.address);
+		values.put(EVENT_SOCIAL_NETWORK_MESSAGE, event.social_network_message);
+		values.put(EVENT_SHARE_FACEBOOK, event.share_facebook);
+		values.put(EVENT_SHARE_TWITTER, event.share_twitter);
+		values.put(EVENT_SHARE_LINKEDIN, event.share_linkedin);
+		values.put(EVENT_IS_SENT_TO_SERVER, event.isSentToServer);
+
+		SQLiteDatabase db = getReadableDatabase();
+		db.insertOrThrow(EVENTS_TABLE_NAME, null, values);
+	}
+
+	public Cursor getAllCursor(String tableName, String order) {		  
+		SQLiteDatabase db = getReadableDatabase(); 
+		Cursor cursor = db.query(tableName, null, null, null, null,null, order); 		  
+		return cursor;
+	}
+	
+	
+	public Cursor getBagsByTagIdCursor(String tagId) {		  
+		SQLiteDatabase db = getReadableDatabase(); 
+		Cursor cursor = db.query(BAGS_TABLE_NAME, null, BAG_TAG_ID+" = '"+tagId+"'", null, null,null, BAG_NAME+" DESC"); 		  
+		return cursor;
+	}
+		
+	
+	public Cursor getBagsByTagAndName(String tagId) {		  
+		SQLiteDatabase db = getReadableDatabase();
+		String query = "SELECT * FROM "+BAGS_TABLE_NAME+" WHERE "+BAG_TAG_ID+" = ?";
+		Log.d(TAG, "query="+query);
+		Cursor cursor = db.rawQuery(query, new String[] { tagId });
+		
+		//Cursor cursor = db.query(BAGS_TABLE_NAME, null, BAG_TAG_ID+" = '"+tagId+"' AND "+BAG_NAME+" = '"+name+"'", null, null,null, BAG_NAME+" DESC"); 		  
+		return cursor;
+	}
+	
+	public Cursor getActiveBagsCursor() {		  
+		SQLiteDatabase db = getReadableDatabase(); 
+		Cursor cursor = db.query(BAGS_TABLE_NAME, null, BAG_IS_DELETED+" = 0", null, null,null, BAG_NAME+" DESC"); 		  
+		return cursor;
+	}
+	
+	public Cursor getActiveBagsByTagIdCursor(String tagId, int type) {		  
+		SQLiteDatabase db = getReadableDatabase();
+		Cursor cursor;
+		if (type == Bag.TAG_TYPE_NFC || type == Bag.TAG_TYPE_QR)
+			cursor = db.query(BAGS_TABLE_NAME, null, BAG_TAG_ID+" = '"+tagId+"' AND "+BAG_IS_DELETED+" = 0 AND "+BAG_TAG_TYPE+" = "+type, null, null,null, BAG_NAME+" DESC");			
+		else
+			cursor = db.query(BAGS_TABLE_NAME, null, BAG_TAG_ID+" = '"+tagId+"' AND "+BAG_IS_DELETED+" = 0", null, null,null, BAG_NAME+" DESC");
+			
+		return cursor;
+	}
+
+
+	public Cursor getBagByContentIdCursor(String contentId) {
+		SQLiteDatabase db = getReadableDatabase(); 
+		Cursor cursor = db.query(BAGS_TABLE_NAME, null, BAG_TAG_ID+" = '"+contentId+"'", null, null,null, null); 		  
+		return cursor;		 
+	}
+
+
+	public Cursor getUnsentEventsCursor() {
+		SQLiteDatabase db = getReadableDatabase(); 
+		Cursor cursor = db.query(EVENTS_TABLE_NAME, null, EVENT_IS_SENT_TO_SERVER+" = FALSE", null, null,null, null); 		  
+		return cursor;		 
+	}
+
+
+	public ArrayList<Bag> getBags(Cursor cursor) { 
+		ArrayList<Bag> list=new ArrayList();
+
+		while (cursor.moveToNext()) {
+			Bag bag = new Bag();
+
+			bag.mName = URLDecoder.decode(cursor.getString(cursor.getColumnIndexOrThrow(BAG_NAME)));
+			bag.mColor = cursor.getInt(cursor.getColumnIndexOrThrow(BAG_COLOR));
+			bag.isSentToServer = cursor.getInt(cursor.getColumnIndexOrThrow(BAG_IS_SENT_TO_SERVER))== 1;			
+			bag.tagId = cursor.getString(cursor.getColumnIndexOrThrow(BAG_TAG_ID));
+			bag.tagType = cursor.getInt(cursor.getColumnIndexOrThrow(BAG_TAG_TYPE));
+			bag.time = cursor.getInt(cursor.getColumnIndexOrThrow(BAG_ADDED_TIME));
+			
+			list.add(bag);
+		}
+
+		return list;
+	}
+
+	public ArrayList<RemovedBag> getRemovedBags(Cursor cursor) { 
+		ArrayList<RemovedBag> list=new ArrayList();
+
+		while (cursor.moveToNext()) {
+			RemovedBag bag = new RemovedBag();
+			
+			bag.tagId = cursor.getString(cursor.getColumnIndexOrThrow(REMOVED_BAG_TAG_ID));
+			bag.time = cursor.getLong(cursor.getColumnIndexOrThrow(REMOVED_BAG_TIME));
+						
+			list.add(bag);
+		}
+
+		return list;
+	}
+
+
+	public ArrayList<Event> getEvents(Cursor cursor) { 
+		ArrayList<Event> list=new ArrayList();
+
+		while (cursor.moveToNext()) {
+			Event event = new Event();			
+			
+			String tagId = cursor.getString(cursor.getColumnIndexOrThrow(EVENT_TAG_ID));
+			String bagName = cursor.getString(cursor.getColumnIndexOrThrow(EVENT_BAG_NAME));
+			Cursor c= getBagsByTagIdCursor(tagId);
+			ArrayList<Bag> bags = getBags(c);
+			for (Bag bag:bags) {
+				if (bag.mName.equals(bagName)) {
+					event.bag = bag;
+					break;
+				}
+			}
+//			if (event.bag==null && bags.size()!=0) 
+//				event.bag=bags.get(0);
+//			
+			event.bag.mColor = cursor.getInt(cursor.getColumnIndexOrThrow(EVENT_BAG_COLOR));
+			
+			event.time = cursor.getLong(cursor.getColumnIndexOrThrow(EVENT_TIME));
+			event.action_type = (int) cursor.getLong(cursor.getColumnIndexOrThrow(EVENT_ACTION_TYPE));
+			event.lat = cursor.getFloat(cursor.getColumnIndexOrThrow(EVENT_LAT));
+			event.lon = cursor.getFloat(cursor.getColumnIndexOrThrow(EVENT_LON));
+			event.address = cursor.getString(cursor.getColumnIndexOrThrow(EVENT_ADDRESS));			
+			event.social_network_message = cursor.getString(cursor.getColumnIndexOrThrow(EVENT_SOCIAL_NETWORK_MESSAGE));;
+			event.isSentToServer = cursor.getLong(cursor.getColumnIndexOrThrow(EVENT_IS_SENT_TO_SERVER))==1;
+			event.share_facebook = cursor.getLong(cursor.getColumnIndexOrThrow(EVENT_SHARE_FACEBOOK))==1;
+			event.share_twitter = cursor.getLong(cursor.getColumnIndexOrThrow(EVENT_SHARE_TWITTER))==1;
+			event.share_linkedin = cursor.getLong(cursor.getColumnIndexOrThrow(EVENT_SHARE_LINKEDIN))==1;
+
+			list.add(event);
+		}
+
+		return list;
+	}
+
+//
+//	public void updateBagNameTag(Bag bag, String newName) {
+//
+//		String q="UPDATE "+BAGS_TABLE_NAME +
+//		" SET "+BAG_NAME+" = "+newName +
+//		" WHERE "+BAG_NAME+" = '"+bag.mName+"'";
+//		//"AND Date = 'Jan-08-1999'" ;
+//		SQLiteDatabase db = getReadableDatabase();
+//		db.execSQL(q);
+//	}
+
+	public void setEventIsSent(Event event , boolean isSent) {
+		int val=isSent?1:0;
+		String q="UPDATE " + EVENTS_TABLE_NAME +
+		" SET "+EVENT_IS_SENT_TO_SERVER+" = "+val +
+		" WHERE "+EVENT_TIME+" = '"+event.time+"'";
+
+		SQLiteDatabase db = getReadableDatabase();
+		db.execSQL(q);
+	}
+	
+	
+	public void setEventAddress(Event event , String address) {		
+		String q="UPDATE " + EVENTS_TABLE_NAME +
+		" SET "+EVENT_ADDRESS+" = '"+address +"'"+
+		" WHERE "+EVENT_TIME+" = '"+event.time+"'";
+
+		SQLiteDatabase db = getReadableDatabase();
+		db.execSQL(q);
+	}
+
+
+	public void setBagIsSent(Bag bag , boolean isSent) {
+		int val=isSent?1:0;
+		String q="UPDATE " + BAGS_TABLE_NAME +
+		" SET "+BAG_IS_SENT_TO_SERVER+" = "+val +
+		" WHERE "+BAG_TAG_ID+" = '"+bag.tagId+"'";
+
+		SQLiteDatabase db = getReadableDatabase();
+		db.execSQL(q);
+	}
+
+
+	public void updateOnlineObjectSent(OnlineObject obj) {
+		if (obj instanceof Event) {
+			setEventIsSent((Event) obj, true);
+		}		
+		else if (obj instanceof Bag) {
+			setBagIsSent((Bag) obj, true);
+		}
+	}
+
+	public void updateEvent(Event event) {
+		deleteEvent(event);
+		addEvent(event);
+	}
+
+
+
+	public void deleteRemovedBag(Bag bag) {
+
+		String q="DELETE FROM "+REMOVED_BAGS_TABLE_NAME +		 	
+		" WHERE "+REMOVED_BAG_TAG_ID+" = '"+bag.tagId+"'";
+		SQLiteDatabase db = getReadableDatabase();
+		db.execSQL(q);
+	}
+
+
+	public void deleteEvent(Event event) {		
+		String q="DELETE FROM "+EVENTS_TABLE_NAME +		 	
+		" WHERE "+EVENT_TIME+" = '"+event.time+"'";
+		SQLiteDatabase db = getReadableDatabase();
+		db.execSQL(q);
+	}
+	
+	public void deleteAllBags() {
+		String q="DELETE FROM "+BAGS_TABLE_NAME;
+		SQLiteDatabase db = getReadableDatabase();
+		db.execSQL(q);	
+	}
+
+	public void removeBagByTagId(String tagId) {
+		String q="DELETE FROM "+BAGS_TABLE_NAME +		 	
+		" WHERE "+BAG_TAG_ID+" = '"+tagId+"'";
+		SQLiteDatabase db = getReadableDatabase();
+		db.execSQL(q);
+	}
+	
+
+	
+	public void deleteDb() { 
+		SQLiteDatabase db = getReadableDatabase();
+		db.execSQL("DROP TABLE IF EXISTS " + EVENTS_TABLE_NAME); 	
+		db.execSQL("DROP TABLE IF EXISTS " + BAGS_TABLE_NAME);
+		db.execSQL("DROP TABLE IF EXISTS " + REMOVED_BAGS_TABLE_NAME);
+	}
+	
+	
+	public List<OnlineObject> getUnsentObjects() {
+		List<OnlineObject> list = new ArrayList();
+		
+		SQLiteDatabase db = getReadableDatabase(); 
+		Cursor cursor = db.query(EVENTS_TABLE_NAME, null, EVENT_IS_SENT_TO_SERVER+" = 0", null, null,null, EVENT_TIME+" DESC"); 		  
+		ArrayList<Event> l1 = getEvents(cursor);
+		
+		cursor = db.query(BAGS_TABLE_NAME, null, BAG_IS_SENT_TO_SERVER+" = 0", null, null,null, BAG_ADDED_TIME+" DESC"); 		  
+		ArrayList<Bag> l2 = getBags(cursor);
+		
+		cursor = db.query(REMOVED_BAGS_TABLE_NAME, null, null, null, null,null, REMOVED_BAG_TIME+" ASC"); 		  
+		ArrayList<RemovedBag> l3 = getRemovedBags(cursor);
+		
+		
+		for (Event e:l1) {
+			if (e.action_type == App.ACTION_DROP || e.action_type == App.ACTION_OTHER || e.action_type == App.ACTION_PICKUP)
+				list.add(e);
+		}
+		
+		for (Bag b:l2) {
+			list.add(b);
+		}
+		
+		for (RemovedBag b:l3) {
+			list.add(b);
+		}
+		
+		Collections.sort(list);
+		return list;
+	}
+	
+	
+
+
+
+}

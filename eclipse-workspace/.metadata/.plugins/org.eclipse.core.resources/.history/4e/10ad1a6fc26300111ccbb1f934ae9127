@@ -1,0 +1,61 @@
+package com.tagabag;
+
+import android.app.Dialog;
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TextView;
+
+public class MyProgressDialog extends Dialog {
+	
+	public static MyProgressDialog show(Context context, CharSequence title,
+	        CharSequence message, boolean indeterminate, boolean cancelable) {
+	    return show(context, title, message, indeterminate, cancelable, null);
+	}
+
+	public static MyProgressDialog show(Context context, CharSequence title,
+	        CharSequence message, boolean indeterminate,
+	        boolean cancelable, OnCancelListener cancelListener) {
+	    MyProgressDialog dialog = new MyProgressDialog(context);
+	    dialog.setTitle(title);
+	    dialog.setCancelable(cancelable);
+	    dialog.setOnCancelListener(cancelListener);
+	    
+	    LayoutInflater inflater = (LayoutInflater) context
+		 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		 
+		 View layout = inflater.inflate(R.layout.progress_dialog, null);
+		
+		 if (message != null) {
+			 ((TextView) layout.findViewById(R.id.message)).setText(message);
+		 }
+	    
+	    dialog.setContentView(layout);
+	    try {
+	    	dialog.show();
+	    }
+	    catch (Exception e) {
+	    	e.printStackTrace();
+	    }
+
+	    return dialog;
+	}
+
+	public MyProgressDialog(Context context) {
+	    super(context, R.style.Dialog);
+	}
+	
+	public MyProgressDialog(Context context, String message) {
+	    super(context, R.style.Dialog);	    
+	    setCancelable(true);	    
+	    
+	    LayoutInflater inflater = (LayoutInflater) context
+		 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		 
+		 View layout = inflater.inflate(R.layout.progress_dialog, null);
+		 ((TextView) layout.findViewById(R.id.message)).setText(message);
+		 setContentView(layout);
+		 
+	}
+	
+}

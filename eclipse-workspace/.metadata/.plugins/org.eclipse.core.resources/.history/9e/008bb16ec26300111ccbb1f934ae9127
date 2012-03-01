@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:id="@+id/menu_nfc_pairing"          
+          android:title="@string/menu_nfc_pairing" />
+    <item android:id="@+id/menu_qr_pairing"          
+          android:title="@string/menu_qr_pairing" />
+    <item android:id="@+id/menu_main"          
+          android:title="@string/menu_main" />
+    <item android:id="@+id/menu_history"          
+          android:title="@string/menu_history" />                                       
+</menu>

@@ -1,0 +1,22 @@
+package com.tagabag.models;
+
+import java.io.Serializable;
+
+public class Event extends OnlineObject implements Serializable, Comparable {	    
+		public String user; 				
+		public Bag bag;			
+		public int action_type;
+		public double lat;
+		public double lon;
+		public String address="";
+		public String social_network_message;
+		public boolean share_facebook=false;
+		public boolean share_twitter=false;
+		public boolean share_linkedin=false;
+		public String bagDbKey;
+		
+		@Override
+		public String toString() {
+			return bag.mName+" at "+address;
+		}
+}

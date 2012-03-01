@@ -1,0 +1,47 @@
+package com.tagabag.parsers;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public abstract class BaseParser {
+	
+	public static final int STATUS_OK = 0;
+	public static final int MISING_PARAMS_ERROR = 1;
+	public static final int USER_EXISTS = 2;
+	public static final int UNKNOWN_TAG_ID = 3;
+	public static final int UNKNOWN_BAG_ID = 4;
+	public static final int UNKNOWN_SESSION_ID = 5;
+	public static final int INVALID_CREDENTIALS = 6;
+	public static final int INVALID_PAIRING_TYPE = 7;
+	public static final int INVALID_ACTION_TYPE = 8;
+	public static final int LAT_LON_NOT_FLOAT = 9;	
+	public static final int TAG_ALREADY_PAIRED = 13;
+	public static final int INVALID_TAG_TYPE = 14;
+	public static final int DATE_NOT_FLOAT = 15;
+
+
+	public abstract Object parse(String s) throws JSONException;
+
+	public BaseParser() {
+		
+	}
+	
+	String mJson;
+
+	public BaseParser(String json) {
+		mJson = json;
+	}
+
+
+	public Integer parseResponse() {
+		try {
+			JSONObject obj = new JSONObject(mJson);
+			return obj.getInt("status_code");
+		} 
+		catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+}

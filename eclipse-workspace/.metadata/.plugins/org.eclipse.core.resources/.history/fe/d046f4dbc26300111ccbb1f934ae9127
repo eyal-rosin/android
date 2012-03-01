@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="10dp"
+    >
+<TextView	  
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content"
+    android:layout_alignParentTop="true"
+    android:layout_centerHorizontal="true"
+    android:textSize="20dp"    
+    android:text="@string/select_nfc_action_title" 
+    />
+
+<LinearLayout 
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"    
+    android:layout_centerInParent="true"
+    android:layout_margin="30dp"
+    >
+	<Button
+		android:id="@+id/nfc_reading_button"  
+	    android:layout_width="fill_parent" 
+	    android:layout_height="wrap_content"	    
+	    android:text="@string/read_tag_action" 
+	    android:onClick="buttonClicked"
+	    />
+	
+	<Button
+		android:id="@+id/nfc_pairing_button"  
+	    android:layout_width="fill_parent" 
+	    android:layout_height="wrap_content"
+	    android:text="@string/pair_tag_action"
+	    android:layout_marginTop="10dp"
+	    android:onClick="buttonClicked" 
+	    />    
+</LinearLayout>    
+
+</RelativeLayout>

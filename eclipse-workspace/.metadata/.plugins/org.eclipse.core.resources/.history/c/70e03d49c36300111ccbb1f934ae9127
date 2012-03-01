@@ -1,0 +1,92 @@
+package com.tagabag.activities;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.RadioButton;
+
+import com.tagabag.App;
+import com.tagabag.R;
+
+public class MainMenu extends BaseActivity {
+	App app;
+	Intent intent;
+	@Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.main_menu);
+        app = (App) getApplication();
+        
+        
+        if (!app.isNfcState)
+			((RadioButton) findViewById(R.id.radio_qr)).setChecked(true);
+	}
+	
+	public void viewActivities(View v) {
+		Intent intent= new Intent(this,ViewActivities.class);
+		startActivity(intent);
+	}
+	
+	
+	public void pairBag(View v) {
+		app.state = App.STATE_PAIR;
+		Intent intent;
+		if (app.isNfcState) {
+			intent = new Intent(this,NfcSearching.class);
+			startActivity(intent);
+		}
+		else {
+			intent = new Intent("com.google.zxing.client.android.TAG_A_BAG_SCAN");			
+	        intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+	        startActivityForResult(intent, ZXING_REQUEST_CODE);
+		}
+		
+	}
+	
+	
+	public void unpairBag(View v) {
+		app.state = App.STATE_UNPAIR;
+		intent = new Intent(this, SelectBag.class);
+//		intent = new Intent(this,NfcSearching.class);
+//		if (app.isNfcState)
+//			intent = new Intent(this,NfcSearching.class);
+//		else
+//			intent = new Intent(this,QrReader.class);
+		startActivity(intent);
+	}
+	
+	
+	
+	public void manageAccount(View v) {
+		Intent intent= new Intent(this,EditAccount.class);
+		startActivity(intent);
+	}
+
+
+	public void menuButtonClicked(View v) {
+		
+	}
+	
+	
+	@Override
+    public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		
+        if (requestCode == ZXING_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+            	if (app.state == App.STATE_PAIR) {
+	                String content = intent.getStringExtra("SCAN_RESULT");
+	                String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
+	                Intent newIntent;
+	                newIntent = new Intent(this, SelectBag.class);
+	    			newIntent.putExtra(App.TAG_ID_EXTRA, content);
+	    			startActivity(newIntent);
+            	}            	
+            }
+            
+        }
+	}
+	
+	
+}

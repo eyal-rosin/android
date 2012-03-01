@@ -1,0 +1,56 @@
+package com.tagabag;
+
+import java.util.ArrayList;
+
+import android.content.Context;
+import android.os.AsyncTask;
+
+import com.tagabag.db.NewDataBase;
+import com.tagabag.models.Bag;
+import com.tagabag.network.NetworkTask;
+import com.tagabag.network.OnlineObjectNetworkTask;
+import com.tagabag.network.RemoveBagNetworkTask;
+import com.tagabag.network.SocialNetworkStatusNetworkTask;
+
+public class NetworkAsyncTask extends AsyncTask<ArrayList<NetworkTask>, Integer, Object> {
+	public static final String TAG="task";
+	NewDataBase db;
+	public NetworkAsyncTask(Context context) {
+		db = new NewDataBase(context);
+	}
+	
+    protected Object doInBackground(ArrayList<NetworkTask>... tasks) {
+    	
+    	for (NetworkTask task:tasks[0]) {
+    		if (task instanceof OnlineObjectNetworkTask) {
+	    		com.tagabag.models.Status statusResult = (com.tagabag.models.Status) task.getResult();
+				if (statusResult!=null && statusResult.mStatus == com.tagabag.models.Status.STATUS_OK) {
+					if (!(task instanceof RemoveBagNetworkTask))
+						db.updateOnlineObjectSent(((OnlineObjectNetworkTask)task).onlineObject);
+					else
+						db.deleteRemovedBag((Bag) ((OnlineObjectNetworkTask)task).onlineObject);								
+				}
+				else {
+					
+				}
+    		}
+    		else if (task instanceof SocialNetworkStatusNetworkTask) {
+    			task.getResult();
+    		}
+        }
+    	db.close();
+    	return null;
+    }
+     
+
+    protected void onProgressUpdate(Integer... progress) {
+        
+    }
+
+    protected void onPostExecute(Object result) {
+        
+    }
+}
+
+
+

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center"
+    android:background="@drawable/background"
+    >
+	
+    <include
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/header" />
+    
+    <RelativeLayout
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"	    
+	    android:layout_weight="1"
+	    android:padding="30dp"	    	    	    
+	    >
+		
+        <TextView
+			android:id="@+id/foundText"  
+		    android:layout_width="wrap_content" 
+		    android:layout_height="wrap_content"		    
+		    android:textColor="@color/normal_text"
+		    android:textSize="18sp"
+			android:gravity="left"			    			
+		    android:layout_alignParentTop="true"
+		    android:layout_marginTop="0dp"
+		    android:visibility="gone"
+		    />
+        
+        <TextView
+			android:id="@+id/result"  
+		    android:layout_width="wrap_content" 
+		    android:layout_height="wrap_content"		    
+		    android:textColor="@color/normal_text"
+		    android:textSize="27sp"
+			android:gravity="center"			    			
+		    android:layout_alignParentTop="true"		    
+		    android:layout_marginTop="20dp"
+		    android:text="@string/pairing_success"
+		    android:layout_centerHorizontal="true"		    
+		    />	  
+        
+		<Button
+			android:id="@+id/tag_it_idle"  
+		    android:layout_width="wrap_content" 
+		    android:layout_height="wrap_content"
+		    android:layout_centerInParent="true"
+		    android:background="@drawable/tag_it"
+		    android:onClick="backToMenu"	    		    
+		    />
+	
+		  
+		
+	</RelativeLayout>	    
+	
+	<FrameLayout	    
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"	        	    
+	    >	
+	    <include
+        	layout="@layout/footer"
+        	/>
+	</FrameLayout>    	
+	
+</LinearLayout>    
+    
+

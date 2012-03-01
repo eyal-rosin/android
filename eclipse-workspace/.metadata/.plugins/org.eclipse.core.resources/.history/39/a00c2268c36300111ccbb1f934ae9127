@@ -1,0 +1,113 @@
+package com.tagabag.activities;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.os.Handler;
+
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+import com.tagabag.App;
+import com.tagabag.R;
+import com.tagabag.db.FileManagement;
+import com.tagabag.models.LoginObject;
+import com.tagabag.network.LoginNetworkTask;
+import com.tagabag.parsers.BaseParser;
+
+public class SplashActivity extends BaseActivity {
+	public static final int SPLASH_MIN_DISPLAY_TIME = 2000;
+	FileManagement fm= new FileManagement(this);
+	String email;
+	String password;
+	String facebookToken;
+	Handler mHandler = new Handler();
+	long startTime = System.currentTimeMillis();
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.splash);
+		//App.getInstance().getLocation();
+		GoogleAnalyticsTracker tracker = GoogleAnalyticsTracker.getInstance();
+		tracker.startNewSession(getString(R.string.analyticsId), this);
+		tracker.trackEvent(getString(R.string.analytics_startup), getString(R.string.analytics_startup_from_icon), getString(R.string.analytics_startup_label), 1);
+		tracker.dispatch();
+		
+		SharedPreferences settings = getSharedPreferences(App.MAIN_PREFS,0);        	
+		email=settings.getString(App.EMAIL_PREF, "");
+		password=settings.getString(App.PASSWORD_PREF, "");
+		facebookToken=settings.getString(App.FACEBOOK_TOKEN_PREF, "");
+
+		if (facebookToken.equals("") && (email.equals("") || password.equals(""))) {
+			callNewActivity(Login1.class);        	
+			return;
+		}		
+
+		LoginThread thread = new LoginThread();
+		thread.start();
+
+
+	}
+
+	public void callNewActivity(final Class cls) {
+
+		long delta = System.currentTimeMillis() - startTime;
+		long waitTime=0;
+
+		if (delta<SPLASH_MIN_DISPLAY_TIME) {
+			waitTime = SPLASH_MIN_DISPLAY_TIME-delta;
+		}
+		
+
+		mHandler.postDelayed(new Runnable() {
+			public void run() {
+				Intent intent = new Intent(SplashActivity.this, cls);
+				startActivity(intent);
+			}
+		}, waitTime);
+
+	}
+
+	class LoginThread extends Thread {
+		public void run() {
+
+			LoginObject response;
+			LoginNetworkTask loginNetworkTask;
+			if (!email.equals("") && !password.equals(""))
+				loginNetworkTask = new LoginNetworkTask(email, password);
+			else
+				loginNetworkTask = new LoginNetworkTask(facebookToken);
+				
+			response=(LoginObject) loginNetworkTask.getResult();
+			if (response == null) {
+				callNewActivity(InitialMenu.class);        	            	
+				return;
+			}
+			else if (response.mStatus == BaseParser.STATUS_OK) {
+				
+				SharedPreferences settings = getSharedPreferences(App.MAIN_PREFS,0);
+				SharedPreferences.Editor editor = settings.edit();			    
+			    editor.putString(App.SEESSION_ID_PREF, response.mSessionId);			    
+			    editor.commit();
+			    
+				callNewActivity(InitialMenu.class);				        	            	
+				return;
+			} 
+			else {
+				callNewActivity(Login.class);
+				return;
+			}    	
+
+
+		}
+	}
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		//App.getInstance().releaseGps();
+	}
+
+
+
+}

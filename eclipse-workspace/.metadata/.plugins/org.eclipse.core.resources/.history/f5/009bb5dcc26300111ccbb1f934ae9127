@@ -1,0 +1,24 @@
+package com.tagabag.parsers;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.tagabag.models.LoginObject;
+
+public class LoginParser extends BaseParser {
+	public static String STATUS="status_code";
+	public static String SESSION="session_id";
+	private JSONObject jObject;	
+	
+	public LoginObject parse(String text) throws JSONException{
+		jObject = new JSONObject(text);
+		LoginObject obj = new LoginObject();
+		obj.mStatus = jObject.getInt(STATUS);
+		
+		if (jObject.has(SESSION))
+			obj.mSessionId = jObject.getString(SESSION);
+		
+		return obj;
+	}
+}
+	

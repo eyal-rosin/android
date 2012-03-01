@@ -1,0 +1,213 @@
+package com.tagabag.activities;
+
+import java.util.ArrayList;
+
+import android.app.Activity;
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.IntentFilter.MalformedMimeTypeException;
+import android.database.Cursor;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
+import android.nfc.NfcAdapter;
+import android.nfc.Tag;
+import android.nfc.tech.NfcF;
+import android.os.Bundle;
+import android.os.Parcelable;
+import android.util.Log;
+import android.widget.TextView;
+
+import com.google.zxing.client.android.db.DataBase;
+import com.tagabag.R;
+
+
+
+public class LuggageFinder extends Activity {
+	static final String TAG = "ViewTag";
+	private NfcAdapter mAdapter;
+    private PendingIntent mPendingIntent;
+    private IntentFilter[] mFilters;
+    private String[][] mTechLists;	
+    /**
+     * This activity will finish itself in this amount of time if the user
+     * doesn't do anything.
+     */
+    static final int ACTIVITY_TIMEOUT_MS = 1 * 1000;
+
+    TextView mTitle,ownText;
+
+    //LinearLayout mTagContent;
+    DataBase db;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.nfc_reader);
+        db=new DataBase(this);
+        //mTagContent = (LinearLayout) findViewById(R.id.list);
+        mTitle = (TextView) findViewById(R.id.title);
+        ownText = (TextView) findViewById(R.id.ownText);
+        
+        /* adding the foreground reading capability - the tag will be read by this activity when it is active */
+        
+        mAdapter = NfcAdapter.getDefaultAdapter(this);
+
+        // Create a generic PendingIntent that will be deliver to this activity. The NFC stack
+        // will fill in the intent with the details of the discovered tag before delivering to
+        // this activity.
+        mPendingIntent = PendingIntent.getActivity(this, 0,
+                new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+
+        // Setup an intent filter for all MIME based dispatches
+        IntentFilter ndef = new IntentFilter(NfcAdapter.ACTION_TAG_DISCOVERED);
+        try {
+            ndef.addDataType("*/*");
+        } catch (MalformedMimeTypeException e) {
+            throw new RuntimeException("fail", e);
+        }
+        mFilters = new IntentFilter[] {
+                ndef,
+        };
+
+        // Setup a tech list for all NfcF tags
+        mTechLists = new String[][] { new String[] { NfcF.class.getName()}};
+        /***********************/
+        NdefMessage[] msgs=resolveNfcIntent(getIntent());
+        String hexContent=getMessagesContent(msgs);
+        Cursor c=db.getNfcTagByContentCursor(hexContent);
+        if (db.getNfcTags(c).length>0) {
+        	setTitle("This Tag is familiar!");
+        } else if (msgs!=null){
+        	db.addNfcTag(hexContent);
+        	setTitle("Hello new Tag. You will now be saved.");
+        }
+        	
+        //resolveIntent(getIntent());
+    }
+
+    private NdefMessage[] resolveNfcIntent(Intent intent) {
+        // Parse the intent
+        String action = intent.getAction();
+        if (NfcAdapter.ACTION_TAG_DISCOVERED.equals(action)) {
+            // When a tag is discovered we send it to the service to be save. We
+            // include a PendingIntent for the service to call back onto. This
+            // will cause this activity to be restarted with onNewIntent(). At
+            // that time we read it from the database and view it.
+            Parcelable[] rawMsgs = intent.getParcelableArrayExtra(NfcAdapter.EXTRA_NDEF_MESSAGES);
+            NdefMessage[] msgs;
+            if (rawMsgs != null) {
+                msgs = new NdefMessage[rawMsgs.length];
+                for (int i = 0; i < rawMsgs.length; i++) {
+                    msgs[i] = (NdefMessage) rawMsgs[i];
+                }
+            } else {
+                // Unknown tag type
+                byte[] empty = new byte[] {};
+                NdefRecord record = new NdefRecord(NdefRecord.TNF_UNKNOWN, empty, empty, empty);
+                NdefMessage msg = new NdefMessage(new NdefRecord[] {record});
+                msgs = new NdefMessage[] {msg};
+            }
+            return msgs;
+            // Setup the views
+            //setTitle(R.string.title_scanned_tag);
+            //buildTagViews(msgs);
+        } else {
+            Log.e(TAG, "Unknown intent " + intent);
+            //finish();
+            return null;
+        }
+    }
+
+    
+    
+    
+    private String getMessagesContent(NdefMessage[] msgs) {
+    	ArrayList<String> contentList=new ArrayList();
+    	if (msgs == null || msgs.length == 0) {        	
+        	return null;            
+        }
+        
+    	String s="";
+        String textEncoding = "UTF-8";
+        byte[] p;
+        int l;
+        for (NdefMessage msg:msgs)
+        	//s+=msg.toByteArray();
+        	for (NdefRecord rcd:msg.getRecords()) { 
+        		p=rcd.toByteArray();//.getPayload();
+        		try {
+        			contentList.add(getHexString(p));
+        		} catch (Exception e) {
+        			e.printStackTrace();
+        			return null;
+        		}        		
+        		
+        	}
+        return contentList.get(0);
+        
+    }
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        setIntent(intent);
+        Tag tagFromIntent = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+        
+        NdefMessage[] msgs=resolveNfcIntent(getIntent());
+        String hexContent=getMessagesContent(msgs);
+        Cursor c=db.getNfcTagByContentCursor(hexContent);
+        if (db.getNfcTags(c).length>0) {
+        	setTitle("This Tag is familiar!");
+        } else {
+        	db.addNfcTag(hexContent);
+        	setTitle("Hello new Tag. You will now be saved.");
+        }
+        
+    }
+
+    @Override
+    public void setTitle(CharSequence title) {
+        mTitle.setText(title);
+    }
+    
+    public static int byteArrayToInt(byte[] b, int offset) {
+        int value = 0;
+        for (int i = 0; i < 4 && i<b.length; i++) {
+            int shift = (4 - 1 - i) * 8;
+            value += (b[i + offset] & 0x000000FF) << shift;
+        }
+        return value;
+    }
+    
+    public static String getHexString(byte[] b) throws Exception {
+    	  String result = "";
+    	  for (int i=0; i < b.length; i++) {
+    	    result +=
+    	          Integer.toString( ( b[i] & 0xff ) + 0x100, 16).substring( 1 );
+    	  }
+    	  return result;
+    }
+    
+    public static byte[] hexStringToByteArray(String s) {
+        int len = s.length();
+        byte[] data = new byte[len / 2];
+        for (int i = 0; i < len; i += 2) {
+            data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+                                 + Character.digit(s.charAt(i+1), 16));
+        }
+        return data;
+    }
+
+    
+    public void onPause() {
+        super.onPause();
+        mAdapter.disableForegroundDispatch(this);
+    }   
+
+    public void onResume() {
+        super.onResume();
+        mAdapter.enableForegroundDispatch(this, mPendingIntent, mFilters, mTechLists);
+    }
+
+    
+}
+

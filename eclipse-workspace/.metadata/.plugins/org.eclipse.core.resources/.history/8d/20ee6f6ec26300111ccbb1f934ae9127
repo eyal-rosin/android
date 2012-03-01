@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+
+
+<TextView
+	android:id="@+id/title"  
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content"        
+    android:visibility="gone" 
+    />
+
+
+<TextView
+	android:id="@+id/unknown_tag"  
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content"
+    android:text="@string/unknown_qr"    
+    android:visibility="gone" 
+    />
+
+<TableLayout
+	android:id="@+id/tag_details"    
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    >
+    <TableRow>
+	    <TextView
+		android:id="@+id/details_title"  
+	    android:layout_width="fill_parent" 
+	    android:layout_height="wrap_content"
+	    android:text="@string/details_title"    
+	    android:visibility="gone" 
+	    />
+    </TableRow>
+	<TableRow>
+	<TextView
+	    android:layout_width="wrap_content" 
+	    android:layout_height="wrap_content"
+	    android:text="@string/name"    
+	    />
+	<TextView
+		android:id="@+id/name"  
+	    android:layout_width="fill_parent" 
+	    android:layout_height="wrap_content"        
+	    />
+	</TableRow>
+	<TableRow>
+	<TextView
+	    android:layout_width="wrap_content" 
+	    android:layout_height="wrap_content"
+	    android:text="@string/address"    
+	    />
+	<TextView
+		android:id="@+id/address"  
+	    android:layout_width="fill_parent" 
+	    android:layout_height="wrap_content"        
+	    />
+	</TableRow>
+	<TableRow>
+	<TextView
+	    android:layout_width="wrap_content" 
+	    android:layout_height="wrap_content"
+	    android:text="@string/tel"    
+	    />
+	<TextView
+		android:id="@+id/tel"  
+	    android:layout_width="fill_parent" 
+	    android:layout_height="wrap_content"        
+	    />
+	</TableRow>
+</TableLayout>		
+
+
+
+<LinearLayout 
+	android:id="@+id/social_networds_frame"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:visibility="gone"    
+    android:padding="50dp"
+    >
+<TextView  
+    android:id="@+id/lblshare"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:text="Wanna tell your friends?"    
+    android:gravity="center"
+    android:layout_marginBottom="20dp"
+    />
+<Button
+    android:id="@+id/post_twit"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:text="twitter"  
+    android:onClick="onTwitterClicked"
+    android:layout_marginTop="20dp"  
+    />    
+
+<Button
+    android:id="@+id/post_facebook"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content" 
+    android:text="facebook"    
+    android:onClick="onFacebookClicked"
+    android:layout_marginTop="20dp"
+    />    
+    
+</LinearLayout>
+
+
+
+</LinearLayout>

@@ -1,0 +1,67 @@
+package com.tagabag.network;
+
+import java.io.IOException;
+
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+
+import com.tagabag.App;
+import com.tagabag.models.SocialNetworks;
+
+public class SocialNetworkStatusNetworkTask extends OnlineObjectNetworkTask{
+	SocialNetworks mSn;
+	String mMessage;
+	boolean isFacebook;
+	boolean isTwitter;
+	boolean isLinkedin;
+	SharedPreferences mPrefs;
+	boolean isOnline;
+
+	public SocialNetworkStatusNetworkTask(Context context, SocialNetworks sn, SharedPreferences prefs, String message, boolean facebook, boolean twitter, boolean linkedin) {		
+		mSn = sn;
+		mPrefs = prefs;
+		mMessage = message;
+		isFacebook = facebook;
+		isTwitter = twitter;
+		isLinkedin = linkedin;
+		
+		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		isOnline = cm.getActiveNetworkInfo().isConnectedOrConnecting();
+		    
+	}
+
+	/*
+	 * this only works when the app is online. the reason is that there is no way 
+	 * to know if the socail networks message was delivered, so we might as well 
+	 * not try any of them if offline
+	 * hopefullt in that situation the event is not sent as well, and we can send everything later. 
+	 */
+	protected String callServer() throws IOException{
+		if (!isOnline)
+			return null;
+		
+		if (mMessage!=null && !mMessage.equals("")) {
+			if (isFacebook) {        			
+				mSn.postFacebookStatus(mPrefs.getString(App.FACEBOOK_TOKEN_PREF,null), mMessage);				
+			}
+
+			if (isTwitter) {
+				mSn.postTwitterStatus(mPrefs.getString(App.TWITTER_ACCESS_TOKEN_PREF,null), mPrefs.getString(App.TWITTER_SECRET_TOKEN_PREF,null), mMessage);				
+			}
+			
+			if (isLinkedin) {				
+				mSn.postLinkedinStatus(mPrefs.getString(App.LINKEDIN_TOKEN, null), mPrefs.getString(App.LINKEDIN_SECRET, null), mMessage);				
+			}
+
+		}
+	
+		return "ok";
+	}
+	
+	@Override
+	public Object getResult() {
+		return null;
+	}
+
+}

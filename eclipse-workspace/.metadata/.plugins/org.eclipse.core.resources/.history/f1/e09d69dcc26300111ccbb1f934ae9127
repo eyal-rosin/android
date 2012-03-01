@@ -1,0 +1,63 @@
+package com.tagabag;
+
+import java.util.ArrayList;
+
+import android.content.Context;
+import android.os.AsyncTask;
+
+import com.tagabag.db.NewDataBase;
+import com.tagabag.models.Bag;
+import com.tagabag.models.Event;
+import com.tagabag.network.OnlineObjectNetworkTask;
+import com.tagabag.network.RemoveBagNetworkTask;
+import com.tagabag.network.SendEventNetworkTask;
+
+public class MyAsyncTask extends AsyncTask<ArrayList<OnlineObjectNetworkTask>, Integer, Object> {
+	public static final String TAG="task";
+	NewDataBase db;
+	public MyAsyncTask(Context context) {
+		db = new NewDataBase(context);
+	}
+	
+    protected Object doInBackground(ArrayList<OnlineObjectNetworkTask>... tasks) {
+    	for (OnlineObjectNetworkTask task:tasks[0]) {
+
+    		//if this is an Event, and the address is not available, try tog get it now.
+    		if (task instanceof SendEventNetworkTask) {
+    			Event event = (Event) task.onlineObject;
+    			if (event.address.equals("")) {
+    				String address=App.getInstance().getEventAddress(event);
+    				if (!address.equals("")) {
+    					db.setEventAddress(event, address);
+    					event.address = address;
+    				}
+    			}
+    		}
+    		
+    		com.tagabag.models.Status statusResult = (com.tagabag.models.Status) task.getResult();
+			if (statusResult!=null && statusResult.mStatus == com.tagabag.models.Status.STATUS_OK) {
+				if (!(task instanceof RemoveBagNetworkTask))
+					db.updateOnlineObjectSent(task.onlineObject);
+				else
+					db.deleteRemovedBag((Bag)task.onlineObject);								
+			}
+			else {
+				
+			}
+        }
+    	db.close();
+    	return null;
+    }
+     
+
+    protected void onProgressUpdate(Integer... progress) {
+        
+    }
+
+    protected void onPostExecute(Object result) {
+        
+    }
+}
+
+
+

@@ -1,0 +1,30 @@
+package com.tagabag.models;
+
+public class Pairing {
+	double lon, lat;
+	String date;
+	String type;
+	
+	public Pairing(String date, String type, double lat, double lon) {
+		this.date=date;
+		this.type=type;
+		this.lon=lon;
+		this.lat=lat;
+	}
+	
+	public String getDate() {
+		return date;
+	}
+	
+	public String getType() {
+		return type;
+	}
+	
+	public double getLat() {
+		return lat;
+	}
+	
+	public double getLon() {
+		return lon;
+	}
+}

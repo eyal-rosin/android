@@ -1,0 +1,193 @@
+package com.tagabag.activities;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+
+import android.content.Context;
+import android.database.Cursor;
+import android.os.Bundle;
+import android.text.format.DateFormat;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.TextView;
+
+import com.tagabag.App;
+import com.tagabag.R;
+import com.tagabag.db.NewDataBase;
+import com.tagabag.models.Bag;
+import com.tagabag.models.Event;
+
+public class ViewActivities extends BaseActivity implements OnItemClickListener {
+
+	static final String TAG = "viewA";
+
+	ListView list;
+
+	NewDataBase db;
+	ArrayList<Event> events;
+	MyArrayAdapter adapter;
+	
+	App app;
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.view_activities);
+		app = (App) getApplication(); 
+
+		list = (ListView) findViewById(R.id.list);
+	
+		if (!app.isNfcState)
+			((RadioButton) findViewById(R.id.radio_qr)).setChecked(true);
+		
+		db = new NewDataBase(this);
+		Cursor c = db.getAllCursor(NewDataBase.EVENTS_TABLE_NAME, NewDataBase.EVENT_TIME+" DESC");
+		events = db.getEvents(c);
+		
+		if (events.size() == 0) {
+			list.setVisibility(View.GONE);
+			findViewById(R.id.viewAcitivitiesTitle).setVisibility(View.GONE);
+			customDialog(getString(R.string.hey), getString(R.string.no_activities), new Runnable() {
+				public void run() {
+					finish();
+				}
+			});
+			return;
+		}
+		
+		adapter = new MyArrayAdapter(this, R.layout.activity_item, R.id.bag_item_text, events);
+		list.setAdapter(adapter);
+		list.setOnItemClickListener(this);		
+
+	}
+
+	
+	
+	public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+		Event bag = events.get(position);
+		
+	}
+	
+	class MyArrayAdapter extends ArrayAdapter<Event> {
+		ArrayList<Event> mEvents;
+		LayoutInflater inflater;
+		public MyArrayAdapter(Context context, int layoutResId, int textViewResId, ArrayList<Event> events) {
+			super(context, layoutResId, textViewResId, events);
+			mEvents = events;
+			inflater = (LayoutInflater) getSystemService (Context.LAYOUT_INFLATER_SERVICE);
+			
+		}
+		
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			ViewHolder vh;
+			if (convertView == null) {
+				convertView = inflater.inflate(R.layout.activity_item, null);
+				vh = new ViewHolder();
+				vh.activityBagImage = (ImageView) convertView.findViewById(R.id.activityBagImage);
+				vh.activityDetails = (TextView) convertView.findViewById(R.id.activityDetails);
+				vh.activityTitle = (TextView) convertView.findViewById(R.id.activityTitle);
+				convertView.setTag(vh);
+			}
+			else {
+				vh = (ViewHolder) convertView.getTag();
+			}
+			
+			Event event = mEvents.get(position);
+			Log.d(TAG,position+") event.action_type="+event.action_type);
+			String action = getString(R.string.dropoff);
+			switch (event.action_type) {
+				case App.ACTION_DROP:
+					action= getString(R.string.dropoff);
+					break;
+				case App.ACTION_PICKUP:
+					action= getString(R.string.pickup);
+					break;
+				case App.ACTION_OTHER:
+					action= getString(R.string.other);
+					break;
+				case App.ACTION_PAIR:
+					action= getString(R.string.paired);
+					break;
+				case App.ACTION_UNPAIR:
+					action= getString(R.string.unpaired);
+					break;
+			}
+			
+			
+			String time;
+			Calendar c = Calendar.getInstance();
+			c.setTimeInMillis(event.time);
+			
+			String date=DateFormat.format("MMMM d", c).toString();
+    		
+			if ((c.get(c.DAY_OF_MONTH)+"").endsWith("1")) {
+    			date+="st";
+    		}
+    		else if ((c.get(c.DAY_OF_MONTH)+"").endsWith("2")) {
+    			date+="nd";
+    		}
+    		else if ((c.get(c.DAY_OF_MONTH)+"").endsWith("3")){
+    			date+="rd";
+    		}
+    		else {
+    			date+="th";
+    		}
+    		date+=DateFormat.format(", yyyy", c).toString();
+    					
+			vh.activityTitle.setText(event.bag.mName+" - "+action);
+			if (event.address!=null && !event.address.equals(""))
+				vh.activityDetails.setText(event.address+" on "+date);
+			else
+				vh.activityDetails.setText(date);
+			
+			switch (event.bag.mColor) {
+			case Bag.BAG_COLOR_BLACK:
+				vh.activityBagImage.setImageResource(R.drawable.bag_black);
+				break;
+			case Bag.BAG_COLOR_BROWN:
+				vh.activityBagImage.setImageResource(R.drawable.bag_brown);
+				break;
+			case Bag.BAG_COLOR_GREEN:
+				vh.activityBagImage.setImageResource(R.drawable.bag_green);
+				break;
+			case Bag.BAG_COLOR_BLUE:
+				vh.activityBagImage.setImageResource(R.drawable.bag_blue);
+				break;
+			case Bag.BAG_COLOR_RED:
+				vh.activityBagImage.setImageResource(R.drawable.bag_red);
+				break;			
+			case Bag.BAG_COLOR_PURPLE:
+				vh.activityBagImage.setImageResource(R.drawable.bag_purple);
+				break;
+			}
+		
+			
+			
+			return convertView;
+		}
+	}
+	
+	class ViewHolder {
+		TextView activityTitle;
+		TextView activityDetails;
+		ImageView activityBagImage;
+	}
+	
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		if (db!=null)
+			db.close();
+	}
+
+}
+

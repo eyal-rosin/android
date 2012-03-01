@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+<TextView  
+    android:text="My luggage History"
+    android:layout_width="fill_parent" 
+    android:layout_height="wrap_content"         
+    android:gravity="left"
+    />
+<TableLayout 
+	android:id="@+id/list_table"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+	<TableRow 
+	    android:orientation="vertical"
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"
+	    >
+	<TextView  	    
+	    android:layout_width="wrap_content"  
+	    android:layout_height="wrap_content"         
+	    android:gravity="left"
+	    android:text="date"
+	    android:textStyle="bold"
+	    />
+	<TextView  
+	    android:id="@+id/type"
+	    android:layout_width="wrap_content" 
+	    android:layout_height="wrap_content"         
+	    android:gravity="left"
+	    android:layout_marginLeft="15dp"
+	    android:text="type"
+	    android:textStyle="bold"
+	    />
+	<TextView  
+	    android:id="@+id/lat"
+	    android:layout_width="wrap_content"
+	    android:layout_height="wrap_content"         
+	    android:gravity="left"
+	    android:layout_marginLeft="15dp"
+	    android:text="location"
+	    android:textStyle="bold"
+	    />
+	
+	</TableRow>            
+    </TableLayout>    
+</LinearLayout>            

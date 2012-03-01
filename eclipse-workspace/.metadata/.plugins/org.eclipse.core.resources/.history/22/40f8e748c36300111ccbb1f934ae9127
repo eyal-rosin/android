@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<resources>
+    <string name="analyticsId">UA-29591307-1</string>
+    <string name="analytics_startup">startup</string>
+    <string name="analytics_tagging">tagging</string>
+    <string name="analytics_startup_from_icon">startup_icon_click</string>
+    <string name="analytics_startup_from_scan">startup_scan</string>
+    <string name="analytics_startup_label">started</string>
+    <string name="analytics_startup_value">1</string>
+    <string name="analytics_tag_type">tag_type</string>
+    <string name="analytics_social_network">social_network</string>
+    <string name="analytics_published">published</string>
+        
+	<string name="version">1.0</string>
+	<string name="tag_prefix">tag a bag</string>
+
+	<string name="app_name">Tag A Bag</string>
+	<string name="app_picker_name">Applications</string>
+	<string name="bookmark_picker_name">Bookmarks</string>
+	<string name="button_add_calendar">Add to calendar</string>
+	<string name="button_add_contact">Add contact</string>
+	<string name="button_back">Back</string>
+	<string name="button_book_search">Book Search</string>
+	<string name="button_cancel">Cancel</string>
+	<string name="button_clipboard_empty">Clipboard empty</string>
+	<string name="button_custom_product_search">Custom search</string>
+	<string name="button_dial">Dial number</string>
+	<string name="button_done">Done</string>
+	<string name="button_email">Send email</string>
+	<string name="button_get_directions">Get directions</string>
+	<string name="button_google_shopper">Google Shopper</string>
+	<string name="button_mms">Send MMS</string>
+	<string name="button_ok">OK</string>
+	<string name="button_open_browser">Open browser</string>
+	<string name="button_product_search">Product Search</string>
+	<string name="button_read_book">Browse book</string>
+	<string name="button_search_book_contents">Search contents</string>
+	<string name="button_share_app">Application</string>
+	<string name="button_share_bookmark">Bookmark</string>
+	<string name="button_share_by_email">Share via email</string>
+	<string name="button_share_by_sms">Share via SMS</string>
+	<string name="button_share_clipboard">Clipboard</string>
+	<string name="button_share_contact">Contact</string>
+	<string name="button_show_map">Show map</string>
+	<string name="button_sms">Send SMS</string>
+	<string name="button_web_search">Web search</string>
+	<string name="button_wifi">Connect to Network</string>
+	<string name="contents_contact">Contact info</string>
+	<string name="contents_email">Email address</string>
+	<string name="contents_location">Geographic coordinates</string>
+	<string name="contents_phone">Phone number</string>
+	<string name="contents_sms">SMS address</string>
+	<string name="contents_text">Plain text</string>
+	<string name="history_clear_text">Clear history</string>
+	<string name="history_email_title">Barcode Scanner history</string>
+	<string name="history_send">Send history</string>
+	<string name="history_title">History</string>
+	<string name="menu_about">About</string>
+	<string name="menu_help">Help</string>
+	<string name="menu_history">History</string>
+	<string name="menu_settings">Settings</string>
+	<string name="menu_share">Share</string>
+	<string name="msg_about">Based on the open source ZXing Barcode Library
+	</string>
+	<string name="msg_buggy">This device has known bugs that cause barcode
+		scanning problems. For more information, visit
+		http://code.google.com/p/zxing/wiki/FrequentlyAskedQuestions</string>
+	<string name="msg_bulk_mode_scanned">Bulk mode: barcode scanned and saved</string>
+	<string name="msg_camera_framework_bug">Sorry, the Android camera encountered a problem.
+		You may need to restart the device.</string>
+	<string name="msg_default_contents">Contents</string>
+	<string name="msg_default_format">Format</string>
+	<string name="msg_default_meta">Metadata</string>
+	<string name="msg_default_mms_subject">Hi</string>
+	<string name="msg_default_status">Place a barcode inside the viewfinder rectangle to
+		scan it.</string>
+	<string name="msg_default_time">Time</string>
+	<string name="msg_default_type">Type</string>
+	<string name="msg_encode_barcode_failed">Could not generate the requested barcode.</string>
+	<string name="msg_encode_contents_failed">Could not encode a barcode from the data provided.
+	</string>
+	<string name="msg_google_shopper_missing">Google Shopper is not installed</string>
+	<string name="msg_install_google_shopper">Google Shopper combines barcode scanning with
+		online and local prices, reviews and more without opening the browser.
+		Would you like to try it?</string>
+	<string name="msg_intent_failed">Sorry, the requested application could not be
+		launched. The barcode contents may be invalid.</string>
+	<string name="msg_loading_apps">Loading list of applications\u2026</string>
+	<string name="msg_not_our_results">You are leaving this application. The search
+		results you will see are not related to this application.</string>
+	<string name="msg_sbc_book_not_searchable">Sorry, this book is not searchable.</string>
+	<string name="msg_sbc_failed">Sorry, the search encountered a problem.</string>
+	<string name="msg_sbc_no_page_returned">No page returned</string>
+	<string name="msg_sbc_page">Page</string>
+	<string name="msg_sbc_searching_book">Searching book\u2026</string>
+	<string name="msg_sbc_snippet_unavailable">Snippet not available</string>
+	<string name="msg_sbc_unknown_page">Unknown page</string>
+	<string name="msg_share_explanation">You can share data by displaying a barcode on your
+		screen and scanning it with another phone.</string>
+	<string name="msg_share_subject_line">Here\'s the contents of a barcode I scanned
+	</string>
+	<string name="msg_unmount_usb">Sorry, the SD card is not accessible.</string>
+	<string name="preferences_actions_title">When a barcode is found\u2026</string>
+	<string name="preferences_bulk_mode_summary">Scan and save many barcodes continuously</string>
+	<string name="preferences_bulk_mode_title">Bulk scan mode</string>
+	<string name="preferences_copy_to_clipboard_title">Copy to clipboard</string>
+	<string name="preferences_custom_product_search_summary">dsds</string>
+	<string name="preferences_custom_product_search_title">Custom search URL</string>
+	<string name="preferences_decode_1D_title">Decode 1D barcodes</string>
+	<string name="preferences_decode_Data_Matrix_title">Decode Data Matrix</string>
+	<string name="preferences_decode_QR_title">Decode QR Codes</string>
+	<string name="preferences_front_light_summary">Improves scanning in low light on some phones, but
+		may cause glare. Does not work on all phones.</string>
+	<string name="preferences_front_light_title">Use front light</string>
+	<string name="preferences_general_title">General settings</string>
+	<string name="preferences_name">Settings</string>
+	<string name="preferences_play_beep_title">Beep</string>
+	<string name="preferences_result_title">Result settings</string>
+	<string name="preferences_scanning_title">When scanning for barcodes\u2026</string>
+	<string name="preferences_vibrate_title">Vibrate</string>
+	<string name="result_address_book">Found contact info</string>
+	<string name="result_calendar">Found calendar event</string>
+	<string name="result_email_address">Found email address</string>
+	<string name="result_geo">Found geographic coordinates</string>
+	<string name="result_isbn">Found book</string>
+	<string name="result_product">Found product</string>
+	<string name="result_sms">Found SMS address</string>
+	<string name="result_tel">Found phone number</string>
+	<string name="result_text">Found plain text</string>
+	<string name="result_uri">Found URL</string>
+	<string name="result_wifi">Found Wifi Configuration</string>
+	<string name="sbc_name">Google Book Search</string>
+	<string name="share_name">Share via barcode</string>
+	<string name="title_about">Barcode Scanner v</string>
+	<string name="wa_name">Wifi Connection</string>
+	<string name="wifi_changing_network">Changing Network</string>
+	<string name="wifi_connected">Connected</string>
+	<string name="wifi_creating_network">Creating Network</string>
+	<string name="wifi_modifying_network">Modifying Network</string>
+	<string name="wifi_ssid_missing">Network name missing</string>
+	<string name="wifi_type_incorrect">Network type incorrect</string>
+	<string name="wifi_connect_failed">Network connection failed</string>
+	<string name="wifi_ssid_label">Network Name</string>
+	<string name="wifi_type_label">Type</string>
+	<string name="zxing_url">http://code.google.com/p/zxing</string>
+
+	<string name="title_scanned_tag">A tag was scanned</string>
+	<string name="select_reader_title">Please select a reading method</string>
+	<string name="read_qr">Barcode reading</string>
+	<string name="read_nfc">NFC tag reading</string>
+	<string name="menu_qr_pairing">QR pairing</string>
+	<string name="menu_nfc_pairing">NFC pairing</string>
+	<string name="menu_main">Main</string>
+
+	<string name="details_title">QR-Code details</string>
+	<string name="name">Name:</string>
+	<string name="address">Address:</string>
+	<string name="tel">Phone:</string>
+	<string name="unknown_qr">Unknown QR format</string>
+	<string name="unknown_tag">This tag is unknown</string>
+
+	<string name="read_paired_tag">Please place the tag close to the back of your
+		phone. If a menu pops up, select \'Luggage Finder\'</string>
+	<string name="pair_tag">Please place the tag close to the back of your
+		phone. If a menu pops up, select \'Luggage Finder\'</string>
+
+	<string name="nfc_reading_own">This is my luggage!</string>
+	<string name="nfc_reading_not_own">This luggage is not mine!</string>
+	<string name="tag_already_paired">This Tag was already paired</string>
+	<string name="new_tag_paired">This new tag is now paired</string>
+
+	<string name="read_tag_action">Read tag</string>
+	<string name="pair_tag_action">Pair tag</string>
+	<string name="select_nfc_action_title">A tag was found! What would you like to do?
+	</string>
+	<string name="social_networks_status_pickup">Just picked up my bag</string>
+	<string name="social_networks_status_dropoff">Just dropped off my bag</string>
+	
+
+	<string name="facebook_app_id">103081926457820</string>
+	<string name="registration_title">Registration</string>
+	<string name="email">Email</string>
+	<string name="password">Password</string>
+	<string name="register">register</string>
+	<string name="missing_param">Both email and password must be filled</string>
+	<string name="ok">OK</string>
+	<string name="connection_error">can\'t connect to internet</string>
+	<string name="connection_error_title">Connection Error</string>
+	<string name="registration_complete">Registration complete</string>
+	<string name="user_exists">This email is already registered</string>
+	<string name="invalid_email">Invalid email address</string>
+
+	<string name="post_facebook">post to facebook</string>
+	<string name="post_twitter">post to twitter</string>
+	<string name="login_title">Login</string>
+	<string name="or_register">or register</string>
+	<string name="login_failed">Incorrect email/password</string>
+	<string name="login_failed_title">Login failed</string>
+	<string name="cancel_social_networks">No thanks</string>
+
+	<string name="nfc_mode">NFC Mode</string>
+	<string name="qr_mode">QR Mode</string>
+	<string name="tagging">Tagging</string>
+	<string name="pair_bag">Pair bag</string>
+	<string name="manage_bags">Manage Bags</string>
+	<string name="unpair_bag">Unpair bag</string>
+	<string name="manage_services">Manage services</string>
+	<string name="manage_account">Manage\naccount</string>
+	<string name="edit_account">Edit account</string>
+	<string name="searching_bag">Looking for your luggage...</string>
+
+	<string name="add_bag_instructions">Please enter data to be written on your tag. If
+		omitted, no data will be written.</string>
+	<string name="full_name">Full Name:</string>
+	<string name="street_address">Street Address:</string>
+	<string name="email_address">Email:</string>
+	<string name="phone">Phone:</string>
+	<string name="luggage_description">Luggage Description</string>
+	<string name="write_data">Write data</string>
+	<string name="encryption">Encryption</string>
+	<string name="submit">submit</string>
+	<string name="paired_bag">Dear NAME_PLACE_HOLDER,\nYour luggage LUGGAGE_PLACE_HOLDER has been paired successfully</string>
+	
+	<string name="tag_place_holder">***</string>
+	<string name="pairing_success">Bag was paired successfully</string>
+	<string name="unpairing_success">Bag was successfully\nunpaired</string>
+	
+	<string name="tag_it">Tag it</string>
+	<string name="pickup">Pick-up</string>
+	<string name="dropoff">Drop-off</string>
+	
+	<string name="tagging_first_time">This is your first time\n tagging a bag!</string>
+	<string name="tagging_previous_time_text">Last tagging was TAGGING_TYPE\n in CITY_PLACE_HOLDER on DATE_PLACE_HOLDER</string>
+	<string name="type_pickup">pick-up</string>
+	<string name="type_dropoff">drop-off</string>	
+	<string name="tagged">Tagged</string>
+	<string name="share">share</string>
+	<string name="luggage_not_yours">This is not your luggage!</string>
+	<string name="just_tagged_bag">Just tagged  my bag</string>
+	<string name="default_bag">my bag</string>
+	
+	<string name="go_ahead">Go ahead</string>
+	<string name="touch_your_bag">Touch\nyour Bag</string>
+	<string name="view_activities">View activities</string>
+	<string name="other">Other</string>
+	<string name="bag_name">Enter the bag\'s name:</string>
+	<string name="or">Or</string>
+	<string name="existing_bag">Select an existing bag</string>
+	<string name="add_bag">Add Bag</string>
+	<string name="unpair">Unpair</string>
+	<string name="cant_find">Can\'t find your bag</string>	
+	<string name="failure_message">We know we are in %1$s but we can\'t locate your bag</string>
+	<string name="no_location">We are not even sure where we are</string>
+	<string name="confirm_remove">Are you sure you want to remove this bag?</string>
+	<string name="confirm_remove_title">Confirm action</string>
+	<string name="yes">Yes</string>
+	<string name="no">No</string>
+	<string name="enter_name">Please enter the bag\'s name</string>
+	<string name="already_paired">This bag is already paired</string>
+	<string name="select_social_network">Please select at least one social network</string>
+	<string name="touchBagToUnpair">Touch bag to unpair</string>
+	<string name="no_bags">The are no bags to unpair</string>
+	<string name="hey">Hey</string>
+	<string name="sharing_success">Thanks - and have a nice trip!</string>
+	<string name="recent_activities">My Recent Activities:</string>
+	<string name="no_activities">There were no activities so far</string>
+	<string name="paired">paired</string>
+	<string name="unpaired">unpaired</string>
+	<string name="logout">Logout</string>
+	<string name="bag_color">Select bag color:</string>
+	<string name="select_bag_color">A bag color must be selected</string>
+	<string name="please_note">Pelase note</string>	
+	<string name="success">Success</string>
+	<string name="error">Error</string>
+	<string name="name_used_title">Bag\'s name is already taken</string>
+	<string name="name_used">Please enter a different name</string>
+	<string name="progress_title">Please Wait</string>
+	<string name="logging_out">Logging out...</string>
+	<string name="logging_in">Logging in...</string>
+	<string name="registering">Registering...</string>
+	<string name="fill_in_message">Please fill in a message</string>
+	
+</resources>

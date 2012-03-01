@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/parabola" >
+    
+
+    <RelativeLayout
+        android:id="@+id/relativeLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/text_view_a"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:textSize="20sp"
+            android:text="@string/text_a" />
+
+        <EditText
+            android:id="@+id/edittext_a"
+            android:layout_width="100dip"
+            android:layout_height="wrap_content"
+            android:inputType="number|numberSigned|numberDecimal"
+            android:imeOptions="actionNext"
+            
+            android:layout_marginLeft="100dip" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/relativeLayout2"
+        android:layout_below="@id/relativeLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/text_view_b"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:textSize="20sp"
+            android:text="@string/text_b" />
+
+        <EditText
+            android:id="@+id/edittext_b"
+            android:layout_width="100dip"
+            android:layout_height="wrap_content"
+            android:inputType="number|numberSigned|numberDecimal"
+            android:imeOptions="actionNext"            
+            android:layout_marginLeft="100dip" />
+    </RelativeLayout>
+    <RelativeLayout
+        android:id="@+id/relativeLayout3"
+        android:layout_below="@id/relativeLayout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:id="@+id/text_view_c"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:textSize="20sp"
+            android:text="@string/text_c" />
+
+        <EditText
+            android:id="@+id/edittext_c"
+            android:layout_width="100dip"
+            android:layout_height="wrap_content"
+            android:inputType="number|numberSigned|numberDecimal"
+            android:imeOptions="actionDone"
+            
+            android:layout_marginLeft="100dip" />
+    </RelativeLayout>
+    <TextView
+        android:layout_below="@id/relativeLayout3"	
+        android:id="@+id/text_view_r"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:layout_alignParentLeft="true"
+        android:text="@string/text_r" />
+    <TextView
+        android:layout_below="@id/text_view_r"	
+        android:id="@+id/text_view_x1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:layout_alignParentLeft="true"
+        android:text="@string/text_x1" />    
+    <TextView
+        android:layout_below="@id/text_view_x1"	
+        android:id="@+id/text_view_x2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:layout_alignParentLeft="true"
+        android:text="@string/text_x2" />
+    <TextView
+        android:layout_below="@id/text_view_x2"	
+        android:id="@+id/text_view_copyright"
+        android:layout_width="match_parent"
+        android:layout_height="40sp"
+        android:textSize="20sp"
+        android:textColor="#FFFF0000"
+        android:gravity="center_vertical|center_horizontal"
+        android:background="#00000000"    
+        android:text="@string/text_copyright" />
+
+
+    
+    
+</LinearLayout>

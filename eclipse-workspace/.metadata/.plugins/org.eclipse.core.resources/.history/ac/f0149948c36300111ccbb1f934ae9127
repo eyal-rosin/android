@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center"
+    android:background="@drawable/background"
+    >
+	<include
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/header" />
+        
+    <LinearLayout
+	    android:orientation="vertical"
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"
+	    android:gravity="center"
+	    android:layout_weight="1"	    	    	    
+	    >
+		    
+		<ImageView
+			android:id="@+id/animation"  
+		    android:layout_width="120dp" 
+		    android:layout_height="111dp"	    		    
+		    />
+		    
+		<TextView
+			android:id="@+id/searching_bag"  
+		    android:layout_width="wrap_content" 
+		    android:layout_height="wrap_content"
+		    android:text="@string/searching_bag"
+		    android:textColor="@color/normal_text"
+		    android:textSize="14sp"
+		    />
+	</LinearLayout>	    
+	
+	<FrameLayout	    
+	    android:layout_width="fill_parent"
+	    android:layout_height="wrap_content"	        	    
+	    >	
+	    <include
+        	layout="@layout/footer"
+        	/>
+	</FrameLayout>    	
+	
+</LinearLayout>    
+    
+

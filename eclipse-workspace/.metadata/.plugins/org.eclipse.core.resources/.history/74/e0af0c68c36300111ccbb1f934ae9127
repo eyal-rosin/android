@@ -1,0 +1,86 @@
+package com.tagabag.activities;
+
+import java.util.ArrayList;
+
+import android.app.ProgressDialog;
+import android.content.Context;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.TableLayout;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import com.tagabag.R;
+import com.tagabag.db.FileManagement;
+import com.tagabag.models.Pairing;
+import com.tagabag.network.ServerConnection;
+import com.tagabag.parsers.HistoryParser;
+
+public class History extends MenuActivity {
+	TableLayout table;
+	Handler mHandler=new Handler();
+	String email;
+	ProgressDialog progressDialog;
+	ArrayList<Pairing> historyList;
+	FileManagement fm=new FileManagement(this);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.history);
+        email=fm.getInfo(FileManagement.Type.EMAIL);
+        table=(TableLayout) findViewById(R.id.list_table);
+        progressDialog = new ProgressDialog(History.this);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        progressDialog.setMessage("Loading history...");
+        
+        
+        new Thread() {
+        	public void run() {        		
+        		try {
+        			String s=ServerConnection.getHistory(email);
+        			historyList=new HistoryParser().parse(s);
+        		} catch (Exception e) {
+        			e.printStackTrace();
+        			
+        		}
+        		
+        		mHandler.post(new Runnable() {
+        			public void run() {
+        				if (historyList==null) {
+        					Toast.makeText(History.this, "can't connect to internet",500).show();
+        					return;
+        				}
+        				
+        				LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        				for (int i=0;i< historyList.size();i++) {
+        					View v=inflater.inflate(R.layout.paired_luggage_list_itm, null);
+        					String lat=historyList.get(i).getLat()+"";
+        					if (lat.length()>8)
+        						lat=lat.substring(0,8);
+        		
+        					String lon=historyList.get(i).getLon()+"";
+        					if (lon.length()>8)
+        						lon=lon.substring(0,8);
+        					
+        					((TextView)v.findViewById(R.id.date)).setText(historyList.get(i).getDate().substring(0,10));
+        					((TextView) v.findViewById(R.id.type)).setText(historyList.get(i).getType().replace("type_", ""));
+        					((TextView)v.findViewById(R.id.location)).setText(lat+","+lon);
+        					
+        					table.addView(v);
+        					
+        					
+        				}
+        				
+        				
+        				progressDialog.cancel();
+        			}
+        		});
+        	}
+        }.start();
+    }
+    
+    
+}
+

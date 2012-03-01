@@ -1,0 +1,106 @@
+package com.tagabag.network;
+
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.util.List;
+
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
+
+import android.util.Log;
+
+import com.tagabag.network.ServerConnection.Method;
+import com.tagabag.parsers.BaseParser;
+
+public abstract class NetworkTask {
+	String TAG="server";
+	public static final String BASE_URL="http://luggage-finder.appspot.com";
+	public static final String GOOGLE_REVERSE_GEO_URL = "http://maps.googleapis.com/maps/api/geocode/json";
+	public static final String NEW_BASE_URL="http://tag-a-bag.appspot.com";
+	public static final String SECURE_BASE_URL="https://tag-a-bag.appspot.com";
+	
+	BaseParser parser;	
+	
+	protected String connectToServer(Method method, String relativeUrl, List<NameValuePair> pairs) throws IOException{
+		String response;
+		if (method==Method.POST)
+			response=connectToServerPostMethod(relativeUrl,pairs);
+		else
+			response=connectToServerGetMethod(relativeUrl,pairs);
+		
+		return response;
+	}
+		
+	private static String connectToServerPostMethod(String url, List<NameValuePair> pairs) throws IOException{				
+		DefaultHttpClient httpclient = new DefaultHttpClient();				
+		HttpPost post;
+		
+		post = new HttpPost(url);
+		
+		post.setEntity(new UrlEncodedFormEntity(pairs));
+		HttpResponse response = httpclient.execute(post);				      			
+		if (response.getStatusLine().getStatusCode()!=200) {
+			//throw new ServerConnectionError("connectToServer",response.getStatusLine().getStatusCode()+"");
+		}
+		
+		return EntityUtils.toString(response.getEntity());
+
+	}
+	
+	private String connectToServerGetMethod(String relativeUrl, List<NameValuePair> pairs) throws IOException{		
+		String params="";
+		NameValuePair nameValuePair;
+		
+		for (int i=0;i<pairs.size();i++) {
+			nameValuePair=pairs.get(i);
+			if (i==0) {
+				params+="?";
+			} else
+				params+="&";
+			Log.d(TAG,nameValuePair.getName()+" = "+nameValuePair.getValue());
+			params+=nameValuePair.getName()+"="+URLEncoder.encode(nameValuePair.getValue(),"UTF-8");
+		}
+		
+		DefaultHttpClient httpclient = new DefaultHttpClient();
+	    
+	    
+		HttpGet httpget;
+		String url;
+		
+		url=relativeUrl+params;			
+		
+		Log.i(TAG,"url="+url);
+		
+		httpget = new HttpGet(url);		
+		Header[] hs=httpget.getAllHeaders();
+		
+		HttpResponse response;	    	    
+	    response = httpclient.execute(httpget);
+	    if (response.getStatusLine().getStatusCode()!=200) {
+			//throw new ServerConnectionError("connectToServer",response.getStatusLine().getStatusCode()+"");
+		}
+	    
+	    String result= EntityUtils.toString(response.getEntity());
+	    Log.i(TAG,"response="+result);
+        return result;        
+	}
+	
+	abstract String callServer()  throws IOException;
+
+	public Object getResult() {
+		try {
+			String text = callServer();
+			return parser.parse(text);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+}

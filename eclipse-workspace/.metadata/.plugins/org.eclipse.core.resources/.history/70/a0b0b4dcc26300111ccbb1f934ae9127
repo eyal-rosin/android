@@ -1,0 +1,42 @@
+package com.tagabag.parsers;
+
+import java.util.ArrayList;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.tagabag.models.Pairing;
+
+public class HistoryParser extends BaseParser {
+	public String LAT="lat";
+	public String LON="long";
+	public String TYPE="type";
+	public String DATE="date";
+	
+	private JSONArray jArray;
+	
+	
+	public ArrayList<Pairing> parse(String text) throws JSONException{
+		JSONObject jObject=new JSONObject(text);
+		jArray = jObject.getJSONArray("paired luggage");
+		
+		ArrayList<Pairing> list  = new ArrayList();
+		JSONObject object;
+		String date, type;
+		double lat,lon;
+		int num=jArray.length();
+		for (int i=0; i<num; i++) {
+			object=jArray.getJSONObject(i);
+			date=object.getString(DATE);
+			type=object.getString(TYPE);
+			lat=object.getDouble(LAT);
+			lon=object.getDouble(LON);
+			list.add(new Pairing(date,type,lat,lon));			
+		}
+		
+		return list;
+		
+	}
+}
+	

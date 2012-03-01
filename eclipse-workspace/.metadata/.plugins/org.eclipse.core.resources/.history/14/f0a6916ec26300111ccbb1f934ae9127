@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:padding="10dp"
+    >
+<TextView
+	android:id="@+id/qr_reader"  
+    android:layout_width="wrap_content" 
+    android:layout_height="wrap_content"
+    android:layout_alignParentTop="true"
+    android:layout_centerHorizontal="true"
+    android:textSize="20dp"
+    
+    android:text="@string/select_reader_title" 
+    />
+
+<LinearLayout 
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"    
+    android:layout_centerInParent="true"
+    android:layout_margin="30dp"
+    >
+	<Button
+		android:id="@+id/qr_reader_button"  
+	    android:layout_width="fill_parent" 
+	    android:layout_height="wrap_content"	    
+	    android:text="@string/read_qr" 
+	    android:onClick="buttonClicked"
+	    />
+	
+	<Button
+		android:id="@+id/nfc_reader_button"  
+	    android:layout_width="fill_parent" 
+	    android:layout_height="wrap_content"
+	    android:text="@string/read_nfc"
+	    android:layout_marginTop="10dp"
+	    android:onClick="buttonClicked" 
+	    />    
+</LinearLayout>    
+
+</RelativeLayout>

@@ -1,0 +1,42 @@
+package com.tagabag.network;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
+import com.tagabag.models.Bag;
+import com.tagabag.network.ServerConnection.Method;
+import com.tagabag.parsers.StatusParser;
+
+public class RemoveBagNetworkTask extends OnlineObjectNetworkTask{
+	String relativeUrl = "/remove_bag";
+
+	String mSessionId;
+	public Bag mBag;
+
+	
+	public RemoveBagNetworkTask(String sessionId, Bag bag) {		
+		mSessionId = sessionId;
+		mBag = bag;
+		onlineObject = bag;
+		parser = new StatusParser();
+	}
+
+
+	protected String callServer() throws IOException{
+
+		List<NameValuePair> pairs= new ArrayList<NameValuePair>();			
+
+		String PARAM_SESSION_ID = "session_id";
+		String PARAM_TAG_ID = "tag_id";
+		
+		pairs.add(new BasicNameValuePair(PARAM_SESSION_ID, mSessionId));
+		pairs.add(new BasicNameValuePair(PARAM_TAG_ID, mBag.tagId));		
+				
+		return connectToServer(Method.GET,NEW_BASE_URL+relativeUrl, pairs);
+	}
+ 
+}

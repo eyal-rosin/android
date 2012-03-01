@@ -1,0 +1,5 @@
+package com.tagabag.models;
+
+public class BasicResponse {
+	public int status;
+}

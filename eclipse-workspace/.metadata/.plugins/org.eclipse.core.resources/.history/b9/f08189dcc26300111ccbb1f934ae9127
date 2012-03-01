@@ -1,0 +1,38 @@
+package com.tagabag.activities;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+
+import com.tagabag.R;
+
+public class SelectNfcAction extends MenuActivity {
+	public static int ZXING_REQUEST_CODE=1;
+	static final String TAG = "SelectReader";
+	Button qrReader, tagReader;	
+	String hexContent;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.select_nfc_action);
+        hexContent=getIntent().getStringExtra("hexContent");
+    }
+    
+    public void buttonClicked(View v) {
+    	if (v.getId()==R.id.nfc_pairing_button) {
+    		Intent intent= new Intent(this,NfcSaveTag.class);
+    		intent.putExtra("hexContent", hexContent);
+    		startActivity(intent);    		    	
+    	} else if (v.getId()==R.id.nfc_reading_button) {
+    		Intent intent= new Intent(this,NfcReader.class);
+    		intent.putExtra("hexContent", hexContent);
+    		startActivity(intent);
+    	} else
+    		Log.e("TAG","v.getID()="+v.getId());
+    }
+    
+            
+}
+

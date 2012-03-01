@@ -1,0 +1,26 @@
+package com.tagabag.parsers;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class NewBaseParser {
+	
+	String mJson;
+	
+	public NewBaseParser(String json) {
+		mJson = json;
+	}
+	
+	
+	public Integer parseResponse() {
+		try {
+			JSONObject obj = new JSONObject(mJson);
+			return obj.getInt("status_code");
+		} 
+		catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+}

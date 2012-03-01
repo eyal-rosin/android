@@ -1,0 +1,350 @@
+package com.tagabag.activities;
+
+import java.util.ArrayList;
+
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.EditText;
+
+import com.facebook.android.DialogError;
+import com.facebook.android.FacebookError;
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+import com.sugree.twitter.LinkedInDialog;
+import com.sugree.twitter.Twitter;
+import com.sugree.twitter.TwitterError;
+import com.tagabag.App;
+import com.tagabag.MyAsyncTask;
+import com.tagabag.R;
+import com.tagabag.db.NewDataBase;
+import com.tagabag.models.Bag;
+import com.tagabag.models.Event;
+import com.tagabag.models.SocialNetworks;
+import com.tagabag.network.OnlineObjectNetworkTask;
+import com.tagabag.network.SendEventNetworkTask;
+
+public class TaggingSuccess extends BaseActivity {
+	public static int ZXING_REQUEST_CODE=1;
+	static final String TAG = "success";
+
+	CheckBox facebook, twitter, linkedin;
+	EditText thisTagging;
+	App app;
+	SocialNetworks sn;
+	int actionType;
+	long now;
+	NewDataBase db;
+	Bag bag;
+
+	Event event;
+
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.tagging_success);
+		actionType = getIntent().getIntExtra(App.ACTION_EXTRA, App.ACTION_OTHER);
+		sn = new SocialNetworks(this);
+
+		if (savedInstanceState!=null) {
+			bag = (Bag) savedInstanceState.getSerializable(App.BAG_EXTRA);
+			Log.d(TAG,"getting bag from bundle  bag="+bag);
+		}
+		else {
+			bag = (Bag) getIntent().getSerializableExtra(App.BAG_EXTRA);			
+		}
+		
+		if (bag==null) {
+			finish();
+			return;
+		}
+
+		db = new NewDataBase(TaggingSuccess.this);
+		now = System.currentTimeMillis();
+
+		app = (App) getApplication();
+
+
+
+		facebook = (CheckBox) findViewById(R.id.facebook);
+		twitter = (CheckBox) findViewById(R.id.twitter);
+		linkedin = (CheckBox) findViewById(R.id.linkedin);
+
+		thisTagging = (EditText) findViewById(R.id.thisTagging);
+
+
+
+		String taggingText="";
+		if (actionType == App.ACTION_PICKUP) {		
+			taggingText = getString(R.string.social_networks_status_pickup)+" \""+bag.mName+"\"";
+		}
+		else if (actionType == App.ACTION_DROP) {
+			taggingText = getString(R.string.social_networks_status_dropoff)+" \""+bag.mName+"\"";
+		}
+		else {
+			taggingText = getString(R.string.just_tagged_bag)+" \""+bag.mName+"\"";
+		}
+
+
+		if (app.mAddress!=null)
+			taggingText+=" in "+app.mAddress.getLocality();
+
+		thisTagging.setText(taggingText);
+
+
+		//saveTaggingInfo();
+
+
+		facebook.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener () {
+			public void onCheckedChanged(final CompoundButton buttonView, boolean isChecked) {
+				Log.d(TAG,"isChecked="+isChecked);
+				if (isChecked) {
+					sn.getFacebookAuthentication(new com.facebook.android.Facebook.DialogListener() {
+						@Override
+						public void onComplete(Bundle values) {
+							final SharedPreferences settings = getSharedPreferences(App.MAIN_PREFS,0);
+							for (String s:values.keySet()) {
+								Log.d(TAG, "completed.  "+s+":"+values.get(s).toString());
+							}
+
+							String token = values.getString("access_token");
+							SharedPreferences.Editor editor = settings.edit();
+							editor.putString(App.FACEBOOK_TOKEN_PREF, token);
+							editor.commit();							
+
+						}
+						public void onFacebookError(FacebookError error) {
+							buttonView.toggle();
+						}
+						public void onError(DialogError e) {
+							buttonView.toggle();
+						}			
+						public void onCancel() {
+							buttonView.toggle();
+						}
+
+					});
+
+				}
+			}
+		});
+
+		twitter.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener () {
+			public void onCheckedChanged(final CompoundButton buttonView, boolean isChecked) {
+				Log.d(TAG,"isChecked="+isChecked);
+				if (isChecked) {
+					sn.getTwitterAuthentication(new Twitter.DialogListener() {						
+						public void onComplete(Bundle values) {
+							for (String s:values.keySet()) {
+								Log.d(TAG, "completed.  "+s+":"+values.get(s).toString());
+							}
+
+							SharedPreferences settings = getSharedPreferences(App.MAIN_PREFS,0);
+							SharedPreferences.Editor editor = settings.edit();
+							editor.putString(App.TWITTER_ACCESS_TOKEN_PREF, values.getString("access_token"));
+							editor.putString(App.TWITTER_SECRET_TOKEN_PREF, values.getString("secret_token"));
+
+							editor.commit();
+
+						}		
+						public void onTwitterError(TwitterError e){
+							buttonView.toggle();
+						}		
+						public void onCancel(){
+							buttonView.toggle();
+						}
+						public void onError(com.sugree.twitter.DialogError e) {
+							buttonView.toggle();
+						}
+					});
+				}
+			}
+		});
+
+
+		linkedin.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener () {
+			public void onCheckedChanged(final CompoundButton buttonView, boolean isChecked) {
+				Log.d(TAG,"isChecked="+isChecked);
+				if (isChecked) {
+					final SharedPreferences settings = getSharedPreferences(App.MAIN_PREFS,0);
+
+					if (settings.getString(App.LINKEDIN_TOKEN, null)!=null)
+						return;
+
+					sn.getLinkedinAuthentication(new Twitter.DialogListener() {						
+						public void onComplete(Bundle values) {
+
+							SharedPreferences.Editor editor = settings.edit();
+							editor.putString(App.LINKEDIN_TOKEN, values.getString(LinkedInDialog.OAUTH_TOKEN));
+							editor.putString(App.LINKEDIN_SECRET, values.getString(LinkedInDialog.OAUTH_SECRET));
+							editor.putString(App.LINKEDIN_VERIFIER, values.getString("verifier"));
+
+							editor.commit();
+
+						}		
+						public void onTwitterError(TwitterError e){
+							buttonView.toggle();
+						}		
+						public void onCancel(){
+							buttonView.toggle();
+						}
+						public void onError(com.sugree.twitter.DialogError e) {
+							buttonView.toggle();
+						}
+					});
+				}
+			}
+		});
+
+		event = createAndSaveEvent();
+
+	}
+
+
+	public Event createAndSaveEvent() {
+		Event event = new Event();
+
+		event.action_type = actionType;
+
+
+		event.lat = app.getLat();
+		event.lon = app.getLon();
+
+		event.address = app.getAddressString();
+
+
+
+		event.bag = bag;
+		event.time = now;
+
+		SharedPreferences settings = getSharedPreferences(App.MAIN_PREFS,0);				
+		event.user = settings.getString(App.SEESSION_ID_PREF, "");
+
+		db.addEvent(event);
+
+		return event;
+	}
+
+
+	public void saveTaggingInfo() {
+		SharedPreferences settings = getPreferences(0);
+
+		boolean isPickup;
+		if (app.state == App.ACTION_PICKUP)
+			isPickup = true;
+		else
+			isPickup = false;
+
+		long taggingTime = System.currentTimeMillis();
+		String place = app.mAddress.getLocality();
+
+		SharedPreferences.Editor editor = settings.edit();
+		editor.putBoolean(Tagging.LAST_TAGGING_TYPE, isPickup);
+		editor.putLong(Tagging.LAST_TAGGING_TIME, taggingTime);
+
+		if (place!=null)
+			editor.putString(Tagging.LAST_TAGGING_PLACE, place);
+		// Commit the edits!
+		editor.commit();
+	}
+
+
+	public void onShareClicked(View v) {
+		if (!facebook.isChecked() && !twitter.isChecked() && !linkedin.isChecked()) {
+			customDialog(getString(R.string.hey), getString(R.string.select_social_network));
+			return;
+		}
+
+		final String message=thisTagging.getText().toString();
+		
+		if (message.length()==0) {
+			customDialog(getString(R.string.hey), getString(R.string.fill_in_message));
+			return;
+		}
+
+
+		event.share_facebook = facebook.isChecked();
+		event.share_twitter = twitter.isChecked();
+		event.share_linkedin = linkedin.isChecked();
+		event.social_network_message = message;
+
+
+		final SharedPreferences settings = getSharedPreferences(App.MAIN_PREFS,0);
+		
+		new Thread() {
+			public void run() {
+				if (isOnline()) {
+
+					sn.sendStatusMessages(settings, event);
+					
+					SendEventNetworkTask task = new SendEventNetworkTask(app.getSessionId(), event);
+					ArrayList<OnlineObjectNetworkTask> tasks = new ArrayList();
+					tasks.add(task);
+					new MyAsyncTask(TaggingSuccess.this).execute(tasks);
+
+				}
+				else {
+					db.updateEvent(event);
+				}
+			}
+		}.start();
+
+		addAnalyticsEvent(event);
+
+		customDialog(getString(R.string.success), getString(R.string.sharing_success), new Runnable() {
+			public void run() {
+				Intent intent = new Intent(TaggingSuccess.this, InitialMenu.class);
+				startActivity(intent);
+			}
+		});
+
+	}
+	
+	
+	public void addAnalyticsEvent(Event event) {
+		String analyticsLabel="";	
+		if (event.share_facebook) {        						
+			analyticsLabel+="facebook_";
+		}
+		if (event.share_twitter) {		
+			analyticsLabel+="twitter_";
+		}
+		if (event.share_linkedin) {
+			analyticsLabel+="linkedin_";
+		}
+		GoogleAnalyticsTracker tracker = GoogleAnalyticsTracker.getInstance();
+		tracker.startNewSession(getString(R.string.analyticsId), this);
+		tracker.trackEvent(getString(R.string.analytics_social_network), getString(R.string.analytics_published), analyticsLabel.substring(0,analyticsLabel.length()-1), analyticsLabel.split("_").length);
+		tracker.dispatch();
+		
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		if (db!=null)
+			db.close();
+	}
+
+	//	@Override
+	//	public void onNewIntent(Intent intent) {
+	//		Log.d(TAG, "onNewIntent()");
+	//		super.onNewIntent(intent);
+	//		
+	//        sn.linkedInIntent(intent);
+	//        
+	//	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		Log.d(TAG,"onSaveInstanceState");
+		outState.putSerializable(App.BAG_EXTRA, bag);
+	}
+
+
+}
+

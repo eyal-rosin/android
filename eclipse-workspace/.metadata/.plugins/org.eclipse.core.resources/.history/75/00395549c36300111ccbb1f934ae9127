@@ -1,0 +1,7 @@
+package com.tagabag.models;
+
+import java.util.ArrayList;
+
+public class BagsResponse extends Status{
+	public ArrayList<Bag> bags = new ArrayList();
+}

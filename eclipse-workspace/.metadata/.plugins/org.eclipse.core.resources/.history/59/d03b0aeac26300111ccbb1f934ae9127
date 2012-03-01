@@ -1,0 +1,250 @@
+package com.tagabag.models;
+
+import java.io.IOException;
+
+import oauth.signpost.commonshttp.CommonsHttpOAuthConsumer;
+import oauth.signpost.commonshttp.CommonsHttpOAuthProvider;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import twitter4j.TwitterException;
+import twitter4j.auth.AccessToken;
+import android.app.Activity;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
+
+import com.facebook.android.Facebook;
+import com.google.code.linkedinapi.client.LinkedInApiClient;
+import com.google.code.linkedinapi.client.LinkedInApiClientFactory;
+import com.google.code.linkedinapi.client.oauth.LinkedInAccessToken;
+import com.google.code.linkedinapi.client.oauth.LinkedInOAuthService;
+import com.google.code.linkedinapi.client.oauth.LinkedInOAuthServiceFactory;
+import com.google.code.linkedinapi.client.oauth.LinkedInRequestToken;
+import com.sugree.twitter.LinkedInDialog;
+import com.sugree.twitter.Twitter;
+import com.tagabag.App;
+import com.tagabag.R;
+
+
+public class SocialNetworks {
+	String TAG="sn";	
+
+	private static String ACCESS_KEY = null;
+	private static String ACCESS_SECRET = null;
+	public static String CONSUMER_KEY="mL6Arw9nmw58cKW1p9Lug";
+	public static String CONSUMER_SECRET="1ECFHUG3aj4tZaSQDVzLNFRXgZWO6AoMBCtMemUt80";
+
+	private static final String REQUEST_URL = "https://api.twitter.com/oauth/request_token";
+	private static final String ACCESS_TOKEN_URL = "https://api.twitter.com/oauth/access_token";
+	private static final String AUTH_URL = "https://api.twitter.com/oauth/authorize";
+	private static final String CALLBACK_URL = "app://myapp";
+
+	private static CommonsHttpOAuthConsumer consumer = new CommonsHttpOAuthConsumer(CONSUMER_KEY, CONSUMER_SECRET);
+	private static CommonsHttpOAuthProvider provider = new CommonsHttpOAuthProvider(REQUEST_URL, ACCESS_TOKEN_URL, AUTH_URL); 
+
+	public static String LINKEDIN_API_KEY = "wp8p6pm5zeni";
+	public static String LINKEDIN_API_SECRET = "gUJ1UfLdIU6NFOTX";
+	public static final String OAUTH_CALLBACK_SCHEME = "app";
+	public static final String OAUTH_CALLBACK_HOST = "linkedin";
+	public static final String OAUTH_CALLBACK_URL = OAUTH_CALLBACK_SCHEME + "://" + OAUTH_CALLBACK_HOST;
+
+
+	Facebook facebook;
+	Twitter mTwitter;
+
+	String twitterAuthURL;
+
+	LinkedInOAuthService oAuthService;
+	LinkedInApiClientFactory factory;
+	LinkedInRequestToken liToken;
+	LinkedInApiClient client;
+
+
+	Activity activity;
+	public SocialNetworks(Activity activity) {
+		this.activity = activity;
+		this.facebook = new Facebook(activity.getString(R.string.facebook_app_id));
+		final SharedPreferences settings = activity.getSharedPreferences(App.MAIN_PREFS,0);
+		
+
+		oAuthService = LinkedInOAuthServiceFactory.getInstance().createLinkedInOAuthService(LINKEDIN_API_KEY, LINKEDIN_API_SECRET);
+		factory = LinkedInApiClientFactory.newInstance(LINKEDIN_API_KEY, LINKEDIN_API_SECRET);
+	}
+
+
+	public void getFacebookAuthentication(com.facebook.android.Facebook.DialogListener listener) {
+		final SharedPreferences settings = activity.getSharedPreferences(App.MAIN_PREFS,0);
+		String facebookAccessToken = settings.getString(App.FACEBOOK_TOKEN_PREF,null);
+		if (facebookAccessToken!=null)
+			return;
+
+		facebook.authorize(activity, new String[] {"friends_birthday", "publish_stream","read_stream", "offline_access"},Facebook.FORCE_DIALOG_AUTH,listener);
+	}
+
+
+
+
+	public Facebook getFacebook() {
+		return facebook;		
+	}
+
+	public boolean postFacebookStatus(String facebookAccessToken, String message) {
+
+		Log.d(TAG,"facebook_token="+facebookAccessToken);
+		Bundle parameters = new Bundle();
+		parameters.putString("message", message);
+		parameters.putString("access_token",facebookAccessToken);
+		try {
+			String response = facebook.request("me/feed", parameters,"POST");
+			Log.d(TAG,"facebook response="+response);
+			JSONObject obj = new JSONObject(response);
+			if (obj.has("error"))
+				return false;
+			
+			Log.d(TAG, "posting facebook message");
+			Log.i(TAG, response);
+			return true;			
+		} catch (IOException e) {
+			e.printStackTrace();
+			Log.d(TAG, "error posting facebook message");			
+			return false;
+		} catch (JSONException e) {
+			e.printStackTrace();
+			Log.d(TAG, "error parsing facebook response");			
+			return false;
+		} 		
+
+	}
+
+
+	public void getTwitterAuthentication(Twitter.DialogListener listener) {
+
+		SharedPreferences settings = activity.getSharedPreferences(App.MAIN_PREFS,0);		
+		if (settings.getString(App.TWITTER_ACCESS_TOKEN_PREF, null)!=null &&
+				settings.getString(App.TWITTER_SECRET_TOKEN_PREF, null)!=null) {
+
+			return;
+
+		}
+
+
+		mTwitter = new Twitter(R.drawable.twitter_on);
+		mTwitter.authorize(activity,
+				new Handler(),
+				CONSUMER_KEY,
+				CONSUMER_SECRET,
+				listener);
+		/*
+		 * twitter header:
+		 * OAuth oauth_nonce="oElnnMTQIZvqvlfXM56aBLAf5noGD0AQR3Fmi7Q6Y", oauth_signature_method="HMAC-SHA1", oauth_timestamp="1272325550", oauth_consumer_key="GDdmIQH6jhtmLUypg82g", oauth_token="819797-Jxq8aYUDRmykzVKrgoLhXSq67TEa5ruc4GJC2rWimw", oauth_signature="yOahq5m0YjDDjfjxHaXEsW9D%2BX0%3D", oauth_version="1.0"
+		 */
+		/*
+		try {
+			twitterAuthURL = provider.retrieveRequestToken(
+					consumer, CALLBACK_URL);
+		} catch (OAuthMessageSignerException e) {
+			e.printStackTrace();
+		} catch (OAuthNotAuthorizedException e) {
+			e.printStackTrace();
+		} catch (OAuthExpectationFailedException e) {
+			e.printStackTrace();
+		} catch (OAuthCommunicationException e) {
+			e.printStackTrace();
+		}
+		 */
+
+	}
+
+	public boolean postTwitterStatus(String token, String secret, String message) {
+		
+		try {
+			twitter4j.auth.AccessToken a = new AccessToken(token,secret);
+			twitter4j.Twitter twitter = new twitter4j.TwitterFactory().getInstance();
+			twitter.setOAuthConsumer(SocialNetworks.CONSUMER_KEY, SocialNetworks.CONSUMER_SECRET);
+			twitter.setOAuthAccessToken(a);
+			
+			twitter.updateStatus(message);
+			Log.d(TAG, "posting twitter message");
+			return true;
+		} catch (TwitterException e) {			
+			e.printStackTrace();
+			if (e.getErrorMessage()!=null && e.getErrorMessage().equals("Status is a duplicate."))				
+				return true;
+			
+			
+			Log.d(TAG, "error posting twitter message  "+e.getErrorMessage()+"  "+e.getExceptionCode()+"  "+e.getMessage());
+			return false;
+		} catch (Exception e) {
+			e.printStackTrace();
+			Log.d(TAG, "error posting twitter message");
+			return false;
+
+		}
+	}
+
+
+	public void getLinkedinAuthentication(Twitter.DialogListener listener) {
+
+		liToken = oAuthService.getOAuthRequestToken(OAUTH_CALLBACK_URL);		
+
+		LinkedInDialog ld = new LinkedInDialog(activity, oAuthService, liToken, listener, R.drawable.linked_in);
+		ld.show();
+	}
+
+
+	public boolean postLinkedinStatus(String token, String secret, String message) {		
+		try {
+			LinkedInAccessToken accessToken = new LinkedInAccessToken(token, secret); 
+	
+			client = factory.createLinkedInApiClient(accessToken);
+	
+			//client.postNetworkUpdate(message);
+			
+			client.updateCurrentStatus(message);
+			Log.d(TAG, "posting linkedin message");
+			return true;
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+			Log.d(TAG, "error posting linkedin message");
+			return false;
+		}				
+	}
+	
+	
+	public void sendStatusMessages(SharedPreferences settings, Event event) {
+		if (event.share_facebook) {        			
+			if (!postFacebookStatus(settings.getString(App.FACEBOOK_TOKEN_PREF,null), event.social_network_message)) {
+				Editor editor = settings.edit();
+				editor.putString(App.FACEBOOK_TOKEN_PREF, null);
+				editor.commit();
+			}
+		}
+
+		if (event.share_twitter) {
+			if (!postTwitterStatus(settings.getString(App.TWITTER_ACCESS_TOKEN_PREF,null), settings.getString(App.TWITTER_SECRET_TOKEN_PREF,null), event.social_network_message)) {
+				Editor editor = settings.edit();
+				editor.putString(App.TWITTER_ACCESS_TOKEN_PREF, null);
+				editor.putString(App.TWITTER_SECRET_TOKEN_PREF, null);
+				editor.commit();
+			}
+			
+		}
+
+		if (event.share_linkedin) {
+			if (!postLinkedinStatus(settings.getString(App.LINKEDIN_TOKEN, null), settings.getString(App.LINKEDIN_SECRET, null), event.social_network_message)) {			
+				Editor editor = settings.edit();
+				editor.putString(App.LINKEDIN_SECRET, null);
+				editor.putString(App.LINKEDIN_TOKEN, null);
+				editor.putString(App.LINKEDIN_VERIFIER, null);
+				editor.commit();
+			}
+		}
+	}
+
+
+}

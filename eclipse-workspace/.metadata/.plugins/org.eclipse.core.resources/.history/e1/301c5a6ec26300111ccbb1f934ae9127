@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/footer_bg"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:paddingTop="10dp" >
+
+    <RadioGroup
+        android:id="@+id/radioGrp"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="20dp" >
+
+        <RadioButton
+            android:id="@+id/radio_nfc"
+            android:layout_width="fill_parent"
+            android:layout_weight="2"
+            android:button="@drawable/radio_bg"
+            android:checked="true"
+            android:text="@string/nfc_mode"
+            android:textColor="@color/footer_radio"
+            android:onClick="onAppStateButtonClicked"
+            android:textSize="14sp" />
+
+        <RadioButton
+            android:id="@+id/radio_qr"
+            android:layout_width="fill_parent"
+            android:layout_weight="3"
+            android:button="@drawable/radio_bg"
+            android:checked="false"            
+            android:text="@string/qr_mode"
+            android:textColor="@color/footer_radio"
+            android:onClick="onAppStateButtonClicked"
+            android:textSize="14sp" />
+    </RadioGroup>
+
+</LinearLayout>

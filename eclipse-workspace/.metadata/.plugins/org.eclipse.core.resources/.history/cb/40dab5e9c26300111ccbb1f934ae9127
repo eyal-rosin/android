@@ -1,0 +1,375 @@
+package com.tagabag.activities;
+
+import java.util.ArrayList;
+
+import android.app.Activity;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.database.Cursor;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.nfc.NdefMessage;
+import android.nfc.NdefRecord;
+import android.nfc.NfcAdapter;
+import android.os.Bundle;
+import android.os.Handler;
+import android.util.Log;
+import android.view.View;
+import android.widget.RadioButton;
+
+import com.tagabag.App;
+import com.tagabag.CustomDialog;
+import com.tagabag.R;
+import com.tagabag.db.NewDataBase;
+import com.tagabag.models.Bag;
+import com.tagabag.models.BagsResponse;
+import com.tagabag.models.Event;
+import com.tagabag.models.EventsResponse;
+import com.tagabag.network.GetBagsNetworkTask;
+import com.tagabag.network.GetEventsNetworkTask;
+
+public class BaseActivity extends Activity {
+	final static String TAG="base";
+	Handler mHandler = new Handler();
+	public static int ZXING_REQUEST_CODE=1;
+	public boolean isActive;
+
+	PendingIntent mPendingIntent;
+	NfcAdapter mAdapter;
+	
+	public String className;
+	App app;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		className = getClass().toString();
+		app = App.getInstance();
+		
+		//String[] splits = className.split(".");
+		//className=splits[splits.length-1];
+		Log.d(TAG,className+": onCreate");
+		
+		mAdapter = NfcAdapter.getDefaultAdapter(this);
+		mPendingIntent = PendingIntent.getActivity(this, 0,
+				new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP), 0);
+	}
+
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		getLocation();
+		Log.d(TAG,className+": onResume");
+		isActive = true;
+		if (mAdapter!=null)
+			mAdapter.enableForegroundDispatch(this, mPendingIntent, null, null);
+	}
+
+	@Override
+	public void onNewIntent(Intent intent) {
+		Log.e("Foreground dispatch", "Discovered tag with intent: " + intent);
+		if (!isActive) {
+			NewDataBase db = new NewDataBase(this);
+			byte[] tagId = intent.getByteArrayExtra(NfcAdapter.EXTRA_ID);
+			Cursor c=db.getActiveBagsByTagIdCursor(getHexString(tagId), Bag.TAG_TYPE_NFC);
+			Intent newIntent;
+			ArrayList<Bag> bags = db.getBags(c);
+
+			if (bags.size()==0) {
+				newIntent = new Intent(this, BagNotYours.class);			
+				startActivity(newIntent);
+			}
+			else {
+
+				newIntent = new Intent(this, Tagging.class);
+				newIntent.putExtra(App.BAG_EXTRA, bags.get(0));
+
+				startActivity(newIntent);
+			}
+		}
+
+	}
+
+	@Override
+	public void onStop() {
+		super.onStop();
+		
+		Log.d(TAG,className+": onStop");
+		isActive = false;
+	}
+	
+	@Override
+	public void onPause() {
+		super.onPause();
+		releaseGps();
+		Log.d(TAG,className+": onPause");
+		
+		if (mAdapter!=null)
+			mAdapter.disableForegroundDispatch(this);
+	}
+	
+	@Override
+	public void onDestroy() {
+		super.onDestroy();
+		Log.d(TAG,className+": onDestroy");
+	}
+
+
+	public void customDialog(final String title, final String message, final boolean isFinish) {
+		mHandler.post(new Runnable() {
+			public void run() {
+				CustomDialog.Builder builder = new CustomDialog.Builder(BaseActivity.this);
+				builder.setTitle(title);
+				builder.setMessage(message);
+				builder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						if (isFinish)
+							finish();
+						dialog.cancel();
+						return;
+					} });
+
+				builder.create().show();
+			}
+		});
+
+	}
+
+
+	public void customDialog(final String title, final String message) {
+		customDialog(title, message, null);
+	}
+
+	public void customDialog(final String title, final String message, final Runnable onClick) {
+		mHandler.post(new Runnable() {
+			public void run() {
+				CustomDialog.Builder builder = new CustomDialog.Builder(BaseActivity.this);
+				builder.setTitle(title);
+				builder.setMessage(message);    	    
+				builder.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						if (onClick!=null)
+							onClick.run();
+						dialog.cancel();
+						return;
+					} });
+
+				builder.create().show();
+			}
+		});
+
+	}
+
+
+	//	dialog = new Dialog(this,android.R.style.Theme_Translucent_NoTitleBar);
+	//    dialog.setContentView(R.layout.custom_dialog);
+
+	public void yesNoDialog(final String title, final String message, final Runnable onClick) {
+		mHandler.post(new Runnable() {
+			public void run() {
+				CustomDialog.Builder builder = new CustomDialog.Builder(BaseActivity.this);
+				builder.setTitle(title);
+				builder.setMessage(message);  	    
+				builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						if (onClick!=null)
+							onClick.run();
+						dialog.cancel();
+						return;
+					} 
+				});
+
+				builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.cancel();
+						return;
+					} 
+				});
+
+				builder.create().show();
+			}
+		});
+
+	}
+
+	public void onGoHomeclicked(View v) {
+		Intent intent = new Intent(this, InitialMenu.class);
+		startActivity(intent);
+	}
+
+
+	public boolean getOnlineEvents() {		
+		NewDataBase db = new NewDataBase(this);
+
+		GetBagsNetworkTask task1 = new GetBagsNetworkTask(App.getInstance().getSessionId());
+		BagsResponse bagsResponse= (BagsResponse)task1.getResult();
+
+		if (bagsResponse==null) {
+			db.close();
+			return false;
+		}
+
+		ArrayList<Bag> bags= bagsResponse.bags;
+		for (Bag bag:bags) {
+			Log.d("test1","is_deleted="+bag.isDeleted);
+			db.addBag(bag);
+		}
+
+		GetEventsNetworkTask task2 = new GetEventsNetworkTask(App.getInstance().getSessionId());
+		EventsResponse eventsResponse = (EventsResponse) task2.getResult();		
+		if (eventsResponse==null) {
+			db.createNewDb(null);
+			db.close();
+			return false;
+		}
+
+		ArrayList<Event> events= eventsResponse.events;
+
+		for (Event event:events) {
+			for (Bag bag:bags) {
+				if (bag.dbKey.equals(event.bagDbKey)) {
+					event.bag= bag;
+					break;
+				}
+			}
+			db.addEvent(event);
+		}
+
+
+		db.close();
+		return true;
+
+
+	}
+
+
+
+	public void onAppStateButtonClicked(View v) {
+		RadioButton	rb = (RadioButton) v;
+		if (rb.getId()==R.id.radio_nfc) {
+			if (rb.isChecked()) {
+				App.getInstance().isNfcState = true;
+				Log.d("test1","nfc mode");
+			}
+		}
+		else if (rb.getId()==R.id.radio_qr) {
+			if (rb.isChecked()) {
+				App.getInstance().isNfcState = false;
+				Log.d("test1","qr mode");
+			}
+		}
+	}
+
+	String getMessagesContent(NdefMessage[] msgs) {
+		ArrayList<String> contentList=new ArrayList();
+		if (msgs == null || msgs.length == 0) {        	
+			return null;            
+		}
+
+		String s="";
+		String textEncoding = "UTF-8";
+		byte[] p;
+		int l;
+		for (NdefMessage msg:msgs)
+			//s+=msg.toByteArray();
+			for (NdefRecord rcd:msg.getRecords()) { 
+				p=rcd.toByteArray();//.getPayload();
+				try {
+					contentList.add(getHexString(p));
+				} catch (Exception e) {
+					e.printStackTrace();
+					return null;
+				}        		
+
+			}
+		return contentList.get(0);
+
+	}
+
+	public String getHexString(byte[] b) {
+		String result = "";
+		for (int i=0; i < b.length; i++) {
+			result +=
+					Integer.toString( ( b[i] & 0xff ) + 0x100, 16).substring( 1 );
+		}
+		return result;
+	}
+
+	public static byte[] hexStringToByteArray(String s) {
+		int len = s.length();
+		byte[] data = new byte[len / 2];
+		for (int i = 0; i < len; i += 2) {
+			data[i / 2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)
+					+ Character.digit(s.charAt(i+1), 16));
+		}
+		return data;
+	}
+	
+	
+	public boolean isOnline() {
+		 ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+		 if (cm == null || cm.getActiveNetworkInfo()==null)
+			 return false;
+		 
+		 return cm.getActiveNetworkInfo().isConnectedOrConnecting();
+	}
+	
+	
+	LocationManager locationManager;
+	LocationListener locationListener;	
+	
+	
+	public void getLocation() {
+		//releaseGps();
+		// Acquire a reference to the system Location Manager
+		if (locationManager==null)
+			locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+		//else
+		//return;
+
+
+		if (app.mLocation == null && locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)!=null) {
+			app.mLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+		}
+		if (app.mLocation == null && locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)!=null) {
+			app.mLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+		}
+				
+		// Register the listener with the Location Manager to receive location updates		
+		locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 60000, 100, new MyLocationListener("gps"));
+		locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 60000, 100, new MyLocationListener("network"));
+	}
+
+
+	public void releaseGps() {
+		if (locationManager!=null && locationListener!=null)
+			locationManager.removeUpdates(locationListener);
+		//locationManager=null;
+	}
+	
+	
+	public class MyLocationListener implements LocationListener {
+		String mName;
+		public MyLocationListener(String name) {
+			mName=name;
+		}
+		public void onLocationChanged(Location location) {    	      
+			app.mLocation=location;
+			Log.d(TAG,mName+":  ("+location.getLatitude()+", "+location.getLongitude()+") ");
+		}
+
+		public void onStatusChanged(String provider, int status, Bundle extras) {}
+		public void onProviderEnabled(String provider) {}
+		public void onProviderDisabled(String provider) {}
+	};
+
+
+	
+
+
+}

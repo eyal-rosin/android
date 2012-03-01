@@ -1,0 +1,15 @@
+package com.tagabag.parsers;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+public class SignupParser extends BaseParser {
+	public static String STATUS="status";
+	private JSONObject jObject;	
+	
+	public Integer parse(String text) throws JSONException{
+		jObject = new JSONObject(text);
+		return jObject.getInt(STATUS);
+	}
+}
+	

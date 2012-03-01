@@ -1,0 +1,66 @@
+package com.tagabag.network;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
+
+import com.tagabag.models.Event;
+import com.tagabag.network.ServerConnection.Method;
+import com.tagabag.parsers.StatusParser;
+
+public class SendEventNetworkTask extends OnlineObjectNetworkTask{
+	String relativeUrl = "/add_event";
+
+	String mSessionId;
+	public Event mEvent;
+
+	public SendEventNetworkTask(String sessionId, Event event) {		
+		mSessionId = sessionId;
+		mEvent = event;
+		onlineObject = event;
+		parser = new StatusParser();
+	}
+
+
+	protected String callServer() throws IOException{
+
+		List<NameValuePair> pairs= new ArrayList<NameValuePair>();			
+
+
+		String PARAM_SESSION_ID = "session_id";
+		String PARAM_LAT = "lat";
+		String PARAM_LON ="lon";
+		String PARAM_ADDRESS ="address";
+		String PARAM_ACTION ="action_type";
+		String PARAM_TAG_ID ="tag_id";
+		String PARAM_MESSAGE ="social_network_message";
+		String PARAM_FACEBOOK="facebook";
+		String PARAM_TWITTER = "twitter";
+		String PARAM_LINKEDIN="linkedin";
+
+
+		pairs.add(new BasicNameValuePair(PARAM_SESSION_ID, mSessionId));
+		pairs.add(new BasicNameValuePair(PARAM_LAT, mEvent.lat+""));
+		pairs.add(new BasicNameValuePair(PARAM_LON, mEvent.lon+""));
+		pairs.add(new BasicNameValuePair(PARAM_ADDRESS, mEvent.address));
+		pairs.add(new BasicNameValuePair(PARAM_ACTION, mEvent.action_type+""));
+		pairs.add(new BasicNameValuePair(PARAM_TAG_ID, mEvent.bag.tagId));
+		
+		if (mEvent.social_network_message!=null)
+			pairs.add(new BasicNameValuePair(PARAM_MESSAGE, mEvent.social_network_message));
+
+		if (mEvent.share_facebook)
+			pairs.add(new BasicNameValuePair(PARAM_FACEBOOK, "true"));
+
+		if (mEvent.share_twitter)
+			pairs.add(new BasicNameValuePair(PARAM_TWITTER, "true"));
+		if (mEvent.share_linkedin)
+			pairs.add(new BasicNameValuePair(PARAM_LINKEDIN, "true"));
+
+		return connectToServer(Method.GET,NEW_BASE_URL+relativeUrl, pairs);
+	}
+
+}

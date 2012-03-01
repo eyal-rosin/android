@@ -1,0 +1,327 @@
+package com.tagabag.activities;
+
+import java.util.ArrayList;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.os.Bundle;
+import android.util.Log;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.ListView;
+import android.widget.RadioButton;
+import android.widget.TextView;
+
+import com.tagabag.App;
+import com.tagabag.MyAsyncTask;
+import com.tagabag.R;
+import com.tagabag.db.NewDataBase;
+import com.tagabag.models.Bag;
+import com.tagabag.models.Event;
+import com.tagabag.network.AddBagNetworkTask;
+import com.tagabag.network.OnlineObjectNetworkTask;
+import com.tagabag.network.RemoveBagNetworkTask;
+
+public class SelectBag extends BaseActivity implements OnItemClickListener {
+
+	public static int UNPAIR_REQUEST_CODE=2;
+
+	static final String TAG = "SelectBag";
+
+	EditText nameBox;
+	ListView list;
+	TextView existingBag;	
+
+	NewDataBase db;
+	LinearLayout unpairFrame;
+	LinearLayout pairFrame;
+	Button unpairButton;
+
+	ArrayList<Bag> bags;
+	ArrayAdapter<Bag> adapter;
+	App app;
+
+	ImageButton bagBlack;
+	ImageButton bagBlue;
+	ImageButton bagBrown;
+	ImageButton bagPurple;
+	ImageButton bagGreen;
+	ImageButton bagRed;
+	ImageButton selectedButton;
+
+	String tagId;
+	Bag bag;
+
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.select_bag);
+		app = (App) getApplication(); 
+
+		tagId = getIntent().getStringExtra(App.TAG_ID_EXTRA);
+
+		nameBox=(EditText) findViewById(R.id.bagName);
+		list = (ListView) findViewById(R.id.list);
+		existingBag = (TextView) findViewById(R.id.existingBag);
+		unpairFrame = (LinearLayout) findViewById(R.id.unpairFrame);
+		pairFrame = (LinearLayout) findViewById(R.id.pairFrame);
+		unpairButton = (Button) findViewById(R.id.unpairButton);
+
+		bagBlack = (ImageButton) findViewById(R.id.bagBlack);				
+		bagBlue = (ImageButton) findViewById(R.id.bagBlue);				
+		bagBrown = (ImageButton) findViewById(R.id.bagBrown);				
+		bagPurple = (ImageButton) findViewById(R.id.bagPurple);				
+		bagGreen = (ImageButton) findViewById(R.id.bagGreen);				
+		bagRed = (ImageButton) findViewById(R.id.bagRed);		
+
+		if (!app.isNfcState)
+			((RadioButton) findViewById(R.id.radio_qr)).setChecked(true);
+		
+		db = new NewDataBase(this);
+		Cursor c = db.getActiveBagsCursor();
+		bags = db.getBags(c);
+
+
+		if (app.state == App.STATE_UNPAIR) {
+			unpairFrame.setVisibility(View.VISIBLE);
+			pairFrame.setVisibility(View.GONE);
+			unpairButton.setText(R.string.touchBagToUnpair);
+
+			if (bags.size()==0) {
+				existingBag.setVisibility(View.GONE);
+				list.setVisibility(View.GONE);
+				customDialog(getString(R.string.hey), getString(R.string.no_bags), new Runnable() {
+					public void run() {						
+						finish();
+					}
+				});
+				return;
+			}
+		}
+		else if (app.state == App.STATE_PAIR) {
+			list.setVisibility(View.GONE);
+			Cursor c2;
+			if (app.isNfcState)
+				c2=db.getActiveBagsByTagIdCursor(tagId, Bag.TAG_TYPE_NFC);
+			else
+				c2=db.getActiveBagsByTagIdCursor(tagId, Bag.TAG_TYPE_QR);
+
+			ArrayList<Bag> bags = db.getBags(c2);
+			if (bags.size()!=0) {
+				customDialog(getString(R.string.hey), getString(R.string.already_paired), new Runnable() {
+					public void run() {
+						Intent intent = new Intent(SelectBag.this, MainMenu.class);									
+						startActivity(intent);
+						finish();
+					}
+				});
+				return;
+			}
+		}
+
+
+
+		if (bags.size() == 0) {
+			existingBag.setVisibility(View.GONE);
+			list.setVisibility(View.GONE);
+		}
+		else {
+			adapter = new ArrayAdapter(this, R.layout.bag_item, R.id.bag_item_text, bags);
+			list.setAdapter(adapter);
+			list.setOnItemClickListener(this);
+		}
+
+
+	}
+
+	public void addBagClicked(View v) {
+		InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(nameBox.getWindowToken(), 0);
+
+		String name = nameBox.getText().toString();
+		if (name.equals("")) {
+			customDialog(getString(R.string.please_note), getString(R.string.enter_name));
+			return;
+		}
+		else if (selectedButton==null) {
+			customDialog(getString(R.string.please_note), getString(R.string.select_bag_color));
+			return;
+		}
+
+		bag = new Bag(); 
+		bag.mName = name;
+		bag.tagId = tagId;
+
+		switch (selectedButton.getId()) {
+		case R.id.bagBlack:
+			bag.mColor = Bag.BAG_COLOR_BLACK;
+			break;
+		case R.id.bagBlue:
+			bag.mColor = Bag.BAG_COLOR_BLUE;
+			break;
+		case R.id.bagBrown:
+			bag.mColor = Bag.BAG_COLOR_BROWN;
+			break;
+		case R.id.bagGreen:
+			bag.mColor = Bag.BAG_COLOR_GREEN;
+			break;
+		case R.id.bagPurple:
+			bag.mColor = Bag.BAG_COLOR_PURPLE;
+			break;
+		case R.id.bagRed:
+			bag.mColor = Bag.BAG_COLOR_RED;
+			break;
+		}		
+
+		bag.tagType = app.isNfcState?Bag.TAG_TYPE_NFC:Bag.TAG_TYPE_QR;
+		db.addBag(bag);
+
+		Event event = new Event();
+		event.bag = bag;
+		event.action_type = App.ACTION_PAIR;
+		event.lat = app.getLat();
+		event.lon = app.getLon();				
+		event.address = app.getAddressString();
+		event.time = System.currentTimeMillis();
+		SharedPreferences settings = getSharedPreferences(App.MAIN_PREFS,0);				
+		event.user = settings.getString(App.SEESSION_ID_PREF, "");
+
+		db.addEvent(event);
+
+		AddBagNetworkTask task = new AddBagNetworkTask(app.getSessionId(), bag);
+		ArrayList<OnlineObjectNetworkTask> tasks = new ArrayList();
+		tasks.add(task);
+		new MyAsyncTask(this).execute(tasks);		
+
+		Intent intent = new Intent(this, BagPairing.class);						
+		startActivity(intent);
+	}
+
+	public void unpairBag(View v) {
+		Intent intent;
+		if (app.isNfcState) {
+			intent = new Intent(this,NfcSearching.class);
+			startActivityForResult(intent, UNPAIR_REQUEST_CODE);
+		}
+		else {
+			intent = new Intent("com.google.zxing.client.android.TAG_A_BAG_SCAN");			
+			intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+			startActivityForResult(intent, ZXING_REQUEST_CODE);
+		}
+
+
+
+	}
+
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, Intent intent) {
+		
+		if (requestCode == UNPAIR_REQUEST_CODE) {
+			if (resultCode == RESULT_OK) {
+				bag = (Bag) intent.getSerializableExtra(App.BAG_EXTRA);
+				deleteYesNo(bag);
+			}
+		}
+		else if (requestCode == ZXING_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+            	
+            	if (app.state == App.STATE_UNPAIR) {
+	                String content = intent.getStringExtra("SCAN_RESULT");
+	                String format = intent.getStringExtra("SCAN_RESULT_FORMAT");
+	                
+	                Cursor c=db.getActiveBagsByTagIdCursor(content, Bag.TAG_TYPE_QR);
+	        		Intent newIntent;
+	        		ArrayList<Bag> bags = db.getBags(c);
+	        		if (bags.size()!=0)
+	        			deleteYesNo(bags.get(0));
+	        		else {
+	        			newIntent = new Intent(this, BagNotYours.class);			
+	        			startActivity(newIntent);
+	        		}
+            	}            	
+            }
+            
+        }
+	}
+
+
+	public void deleteYesNo(final Bag bag) {
+		yesNoDialog(getString(R.string.confirm_remove_title), getString(R.string.confirm_remove),new Runnable() {
+			public void run() {				
+
+				Event event = new Event();
+				if (bag!=null)
+					event.bag = bag;
+				else {
+					event.bag = new Bag();					
+					event.bag.tagId="";
+					event.bag.tagType=-1;
+				}
+
+				event.action_type = App.ACTION_UNPAIR;
+				event.lat = app.getLat();
+				event.lon = app.getLon();				
+				event.address = app.getAddressString();
+				event.time = System.currentTimeMillis();
+				SharedPreferences settings = getSharedPreferences(App.MAIN_PREFS,0);				
+				event.user = settings.getString(App.SEESSION_ID_PREF, "");
+
+				db.addEvent(event);
+
+				db.removeBag(bag);
+
+				RemoveBagNetworkTask task = new RemoveBagNetworkTask(app.getSessionId(), bag);
+				ArrayList<OnlineObjectNetworkTask> tasks = new ArrayList();
+				tasks.add(task);
+				new MyAsyncTask(SelectBag.this).execute(tasks);				
+
+				for (Bag b:bags)
+					if (bag.mName.equals(b.mName)) {
+						bags.remove(b);
+						adapter.remove(b);
+						break;
+					}
+
+				if (adapter.isEmpty()) {	
+					list.setVisibility(View.GONE);
+					Intent intent = new Intent(SelectBag.this, MainMenu.class);
+					startActivity(intent);
+				}
+			}
+		});
+	}
+
+
+	public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+		Bag bag = bags.get(position);
+		deleteYesNo(bag);		
+	}
+
+	@Override
+	public void onPause() {
+		super.onPause();
+		if (db!=null)
+			db.close();
+	}
+
+
+	public void onBagClicked(View v) {
+		if (selectedButton!=null) {
+			selectedButton.setImageResource(0);
+		}
+		selectedButton =(ImageButton) v;
+		selectedButton.setImageResource(R.drawable.bag_selected1);
+	}
+
+}
+

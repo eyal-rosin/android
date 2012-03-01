@@ -1,0 +1,81 @@
+package com.tagabag.parsers;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.tagabag.models.Bag;
+import com.tagabag.models.Event;
+import com.tagabag.models.EventsResponse;
+
+public class EventsParser extends StatusParser {
+	public static String STATUS="status_code";
+	public static String EVENTS = "events";
+	public static String TWITTER = "twitter";
+	public static String ADDRESS = "address";
+	public static String LON = "lon";
+	public static String TAG_ID = "tag_id";
+	public static String BAG = "bag";
+	public static String FACEBOOK = "facebook";
+	public static String LINKEDIN = "linkedin";
+	public static String ACTION_TYPE = "action_type";
+	public static String TIME = "time";
+	public static String LAT = "lat";
+	public static String NETWORK_MESSAGE = "social_network_message";
+	
+	private JSONObject jObject;	
+	
+	public EventsResponse parse(String text) throws JSONException{
+		EventsResponse eventsResponse = new EventsResponse();
+		jObject = new JSONObject(text);
+		eventsResponse.mStatus = parseStatus(jObject).mStatus;
+		JSONArray list = jObject.getJSONArray(EVENTS);
+		for (int i=0; i<list.length(); i++) {
+			eventsResponse.events.add(parseEvent(list.getJSONObject(i)));
+		}
+		
+		return eventsResponse;
+	}
+	
+	
+	public Event parseEvent(JSONObject obj) throws JSONException{
+		Event event = new Event();					
+		event.address = obj.getString(ADDRESS);
+		event.lon = obj.getDouble(LON);
+		event.bag = new Bag();
+		event.bag.tagId = obj.getString(TAG_ID);
+		event.bagDbKey = obj.getString(BAG);		
+		event.action_type = obj.getInt(ACTION_TYPE);
+		event.time = obj.getLong(TIME);
+		event.lat = obj.getDouble(LAT);
+		event.social_network_message = obj.getString(NETWORK_MESSAGE);		
+		event.isSentToServer=true;
+		
+		try {
+			event.share_twitter = obj.getBoolean(TWITTER);
+		} 
+		catch (JSONException e) {
+			event.share_twitter =false;
+		}
+		
+		try {
+			event.share_linkedin = obj.getBoolean(LINKEDIN);
+		} 
+		catch (JSONException e) {
+			event.share_linkedin = false;
+		}
+		
+		try {
+			event.share_facebook = obj.getBoolean(FACEBOOK);
+		} 
+		catch (JSONException e) {
+			event.share_facebook = false;
+		}
+		
+		
+		
+		return event;
+	}
+	
+}
+	

@@ -1,0 +1,209 @@
+package com.tagabag.db;
+
+import static android.provider.BaseColumns._ID;
+
+import java.util.ArrayList;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+
+public class DataBase extends SQLiteOpenHelper { 
+	
+	public static final String NFC_TABLE_NAME = "nfcTags";
+	public static final String QR_TABLE_NAME = "qrCodes";	
+	public static final String SETTINGS_TABLE_NAME = "settings";	
+	// Columns in the database
+	public static final String NFC_HEX_CONTENT = "nfc_content";
+	public static final String QR_CODE_CONTENT = "qr_code_content";
+	
+	public static final String SETTINGS_CONTENT = "settings_content";
+	public static final String SETTINGS_NAME = "settings_name";
+	
+	public static final String SETTINGS_NAME_NFC_METHOD = "nfc_method";
+	public static final String NFC_METHOD_READ = "read";
+	public static final String NFC_METHOD_PAIR = "pair";
+	public static final String NFC_METHOD_UNKNOWN = "unknown";	
+	public static final String NFC_MESSAGE_CONTENT = "message";
+	
+	private static final String DATABASE_NAME = "tagabag.db"; 
+	private static final int DATABASE_VERSION = 1;
+	
+	String TAG="sql";
+	/** Create a helper object for the Events database */
+	public DataBase(Context ctx) { 
+		super(ctx, DATABASE_NAME, null, DATABASE_VERSION);
+	}
+	
+	@Override 
+	public void onCreate(SQLiteDatabase db) {		
+		String q="CREATE TABLE " + NFC_TABLE_NAME + " (" 
+					+ _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " 			
+					+ NFC_MESSAGE_CONTENT + " TEXT NOT NULL, "
+					+ NFC_HEX_CONTENT + " TEXT NOT NULL);";
+				
+		db.execSQL(q);
+		q="CREATE TABLE " + QR_TABLE_NAME + " (" 
+			+ _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " 					
+			+ QR_CODE_CONTENT + " TEXT NOT NULL);";
+					
+		db.execSQL(q);
+		
+		q="CREATE TABLE " + SETTINGS_TABLE_NAME + " (" 
+		+ _ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " 					
+		+ SETTINGS_CONTENT + " TEXT NOT NULL,"
+		+ SETTINGS_NAME + " TEXT NOT NULL);";
+				
+		db.execSQL(q);
+		//addSetting(SETTINGS_NAME_NFC_METHOD, NFC_METHOD_UNKNOWN);
+	}
+	
+	@Override 
+	public void onUpgrade(SQLiteDatabase db, int oldVersion,int newVersion) { 
+		db.execSQL("DROP TABLE IF EXISTS " + NFC_TABLE_NAME); 
+		db.execSQL("DROP TABLE IF EXISTS " + QR_TABLE_NAME);
+		onCreate(db);
+	}
+	
+	
+	 public static String NFC_ORDER_BY = NFC_HEX_CONTENT + " DESC";
+	 public static String QR_ORDER_BY = QR_CODE_CONTENT + " DESC";
+	 public static String SETTINGS_ORDER_BY = SETTINGS_NAME + " DESC";
+	 
+	 public void addNfcTag(String hexContent, String message) { 
+	    	// Insert a new record into the data source.     	 
+	    	SQLiteDatabase db = getWritableDatabase();
+	    	ContentValues values = new ContentValues(); 
+	    	values.put(NFC_HEX_CONTENT, hexContent); 
+	    	values.put(NFC_MESSAGE_CONTENT, hexContent); 
+	    	
+	    	db.insertOrThrow(NFC_TABLE_NAME, null, values);
+	 }
+	 
+	 public void addQrCode(String content) { 
+	    	// Insert a new record into the data source.     	 
+	    	SQLiteDatabase db = getWritableDatabase();
+	    	ContentValues values = new ContentValues(); 
+	    	values.put(QR_CODE_CONTENT, content); 	    	
+	    	db.insertOrThrow(QR_TABLE_NAME, null, values);
+	 }
+	 
+	 public void addSetting(String name, String content) { 
+	    	// Insert a new record into the data source.     	 
+	    	SQLiteDatabase db = getWritableDatabase();
+	    	ContentValues values = new ContentValues(); 
+	    	values.put(SETTINGS_CONTENT, content);
+	    	values.put(SETTINGS_NAME, name);
+	    	db.insertOrThrow(SETTINGS_TABLE_NAME, null, values);
+	 }
+	 
+	 public Cursor getAllNfcTagsCursor() {		  
+		 SQLiteDatabase db = getReadableDatabase(); 
+		 Cursor cursor = db.query(QR_TABLE_NAME, null, null, null, null,null, NFC_ORDER_BY); 		  
+		 return cursor;
+	 }
+	 
+	 public Cursor getAllQrCodesCursor() {		  
+		 SQLiteDatabase db = getReadableDatabase(); 
+		 Cursor cursor = db.query(NFC_TABLE_NAME, null, null, null, null,null, QR_ORDER_BY); 		  
+		 return cursor;
+	 }
+	 
+	 public Cursor getNfcTagByContentCursor(String hexContent) {
+		 SQLiteDatabase db = getReadableDatabase(); 
+		 Cursor cursor = db.query(NFC_TABLE_NAME, null, NFC_HEX_CONTENT+" = '"+hexContent+"'", null, null,null, NFC_ORDER_BY); 		  
+		 return cursor;		 
+	 }
+	 		
+	 public Cursor getQrCodeByContentCursor(String content) {
+		 SQLiteDatabase db = getReadableDatabase(); 
+		 Cursor cursor = db.query(QR_TABLE_NAME, null, QR_CODE_CONTENT+" = '"+content+"'", null, null,null, QR_ORDER_BY); 		  
+		 return cursor;		 
+	 }
+	 
+	 public Cursor getSettingByNameCursor(String name) {
+		 SQLiteDatabase db = getReadableDatabase(); 
+		 Cursor cursor = db.query(SETTINGS_TABLE_NAME, null, SETTINGS_NAME+" = '"+name+"'", null, null,null, SETTINGS_ORDER_BY); 		  
+		 return cursor;		 
+	 }
+	 
+	 public String[] getNfcTags(Cursor cursor) { 
+		 ArrayList<String> list=new ArrayList();		 		  		  
+		 while (cursor.moveToNext()) {
+			 // Could use getColumnIndexOrThrow() to get indexes
+			 long id = cursor.getLong(0); 			 
+			 //String hexContent = cursor.getString(1);		
+			 String message = cursor.getString(2);
+			 //list.add(hexContent);
+			 list.add(message);
+		 }
+		 
+		 return list.toArray( (String[]) new String[list.size()]);
+	 }
+	 	 
+	 public String[] getQrCodes(Cursor cursor) { 
+		 ArrayList<String> list=new ArrayList();		 		  		  
+		 while (cursor.moveToNext()) {
+			 // Could use getColumnIndexOrThrow() to get indexes
+			 long id = cursor.getLong(0); 			 
+			 String textContent = cursor.getString(1);			 
+			 list.add(textContent);
+		 }
+		 return list.toArray( (String[]) new String[list.size()]);
+	 }
+	 
+	 public String[] getSettings(Cursor cursor) { 
+		 ArrayList<String> list=new ArrayList();		 		  		  
+		 while (cursor.moveToNext()) {
+			 // Could use getColumnIndexOrThrow() to get indexes
+			 long id = cursor.getLong(0); 			 
+			 String textContent = cursor.getString(1);			 
+			 list.add(textContent);
+		 }
+		 return list.toArray( (String[]) new String[list.size()]);
+	 }
+	  	  
+	 public void updateNfcTag(String hexContent, String newHexContent) {
+		 SQLiteDatabase db = getWritableDatabase();
+		 String q="UPDATE "+NFC_TABLE_NAME +
+		 	" SET "+NFC_HEX_CONTENT+" = "+newHexContent +
+		 	" WHERE "+NFC_HEX_CONTENT+" = '"+hexContent+"'";
+		 	//"AND Date = 'Jan-08-1999'" ;
+		 db.execSQL(q);
+	 }
+	 
+	 public void updateQrCode(String textContent, String newTextContent) {
+		 SQLiteDatabase db = getWritableDatabase();
+		 String q="UPDATE "+QR_TABLE_NAME +
+		 	" SET "+QR_CODE_CONTENT+" = "+newTextContent +
+		 	" WHERE "+QR_CODE_CONTENT+" = '"+textContent+"'";
+		 db.execSQL(q);
+	 }
+	 
+	 public void updateSetting(String name, String newContent) {
+		 SQLiteDatabase db = getWritableDatabase();
+		 String q="UPDATE "+SETTINGS_TABLE_NAME +
+		 	" SET "+SETTINGS_CONTENT+" = '"+newContent+"'" +
+		 	" WHERE "+SETTINGS_NAME+" = '"+name+"'";
+		 db.execSQL(q);
+	 }	 	 
+	 
+	 public void deleteDb() {		  
+		 SQLiteDatabase db = getWritableDatabase();
+		 String q="DELETE FROM " + NFC_TABLE_NAME+";";		 
+		 db.execSQL(q);		  
+		 q="DELETE FROM " + QR_TABLE_NAME+";";
+		 db.execSQL(q);		  
+	 }
+	 
+	 public void deleteNfcTag(String hexContent) {
+		 SQLiteDatabase db = getWritableDatabase();
+		 String q="DELETE FROM "+NFC_TABLE_NAME +		 	
+		 	" WHERE "+NFC_HEX_CONTENT+" = '"+hexContent+"'";
+		 db.execSQL(q);
+	 }
+	 
+	 
+}

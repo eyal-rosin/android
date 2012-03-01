@@ -1,0 +1,59 @@
+package com.tagabag.parsers;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.tagabag.models.Bag;
+import com.tagabag.models.BagsResponse;
+import com.tagabag.models.Event;
+import com.tagabag.models.EventsResponse;
+
+public class BagsParser extends StatusParser {
+	public static String STATUS="status_code";
+	public static String BAGS = "bags";		
+	public static String BAG_NAME = "bag_name";
+	public static String TAG_ID = "tag_id";
+	public static String IS_REMOVED = "is_removed";	
+	public static String BAG_ID = "bag_id";
+	public static String BAG_COLOR = "bag_color";
+	public static String TAG_TYPE = "tag_type";
+	
+	
+	
+	private JSONObject jObject;	
+	
+	public BagsResponse parse(String text) throws JSONException{
+		BagsResponse bagsResponse = new BagsResponse();
+		jObject = new JSONObject(text);
+		bagsResponse.mStatus = parseStatus(jObject).mStatus;
+		JSONArray list = jObject.getJSONArray(BAGS);
+		for (int i=0; i<list.length(); i++) {
+			bagsResponse.bags.add(parseBag(list.getJSONObject(i)));
+		}
+		
+		return bagsResponse;
+	}
+	
+	
+	public Bag parseBag(JSONObject obj) throws JSONException{
+		Bag bag = new Bag();
+		bag.dbKey = obj.getString(BAG_ID);
+		bag.isSentToServer = true;
+		bag.mColor = obj.getInt(BAG_COLOR);
+		bag.mName = obj.getString(BAG_NAME);
+		bag.tagId = obj.getString(TAG_ID);
+		bag.tagType = obj.getInt(TAG_TYPE);
+		bag.isDeleted = obj.getBoolean(IS_REMOVED);
+		bag.time = 0;
+		bag.isSentToServer=true;
+		
+		return bag;
+	}
+	
+	
+
+	
+
+}
+	

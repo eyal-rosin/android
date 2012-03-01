@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/activity_list_item"
+    android:padding="5dp"
+    android:gravity="center_vertical" >
+
+    <ImageView
+        android:id="@+id/activityBagImage"
+        android:layout_width="47dp"
+        android:layout_height="42dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="10dp"
+        android:src="@drawable/bag_brown" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_weight="1"
+        android:orientation="vertical" >
+ 
+        <TextView
+            android:id="@+id/activityTitle"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"                        
+            android:text="my big bag - drop off"
+            android:textColor="@color/button"
+            android:layout_marginBottom="3dp"
+            android:textSize="14sp" />
+ 
+        <TextView
+            android:id="@+id/activityDetails"
+            android:layout_width="fill_parent"            
+            android:layout_height="wrap_content"
+            android:text="Tel-Aviv, Israel on 22/1/2012"                                    
+            android:textColor="@color/button"
+            android:textStyle="italic"
+            android:textSize="11sp" />
+    </LinearLayout>
+
+</LinearLayout>

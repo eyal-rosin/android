@@ -1,0 +1,124 @@
+package com.tagabag.activities;
+
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.os.Bundle;
+import android.os.Vibrator;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
+import android.widget.ImageView;
+import android.widget.RadioButton;
+
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+import com.tagabag.App;
+import com.tagabag.R;
+import com.tagabag.models.Bag;
+
+public class Tagging extends BaseActivity {	
+	static final String TAG = "tagging";
+	public static final String LAST_TAGGING_TIME="last_tagging";
+	public static final String LAST_TAGGING_TYPE="tagging_type";
+	public static final String LAST_TAGGING_PLACE="tagging_place";
+	
+	App app;		
+	
+	boolean isPickup;
+	long taggingTime;
+	String place;
+	
+	private Animation taggingAnim;
+	ImageView taggingAnimImage;
+	
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.tagging);
+        
+        app = (App) getApplication();
+        
+        Vibrator vib = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE); 
+        vib.vibrate(1000); 
+        
+        SharedPreferences settings = getPreferences(0);
+        isPickup = settings.getBoolean(LAST_TAGGING_TYPE, false);
+        taggingTime = settings.getLong(LAST_TAGGING_TIME, 0);
+        place = settings.getString( LAST_TAGGING_PLACE, "");
+        
+        if (!app.isNfcState)
+			((RadioButton) findViewById(R.id.radio_qr)).setChecked(true);
+        
+        findViewById(R.id.radio_nfc).setEnabled(false);
+        findViewById(R.id.radio_qr).setEnabled(false);
+        
+        taggingAnimImage = (ImageView) findViewById(R.id.taggingAnim);
+        
+        taggingAnim = AnimationUtils.loadAnimation(this, R.anim.tagging_animation);
+        taggingAnim.setInterpolator(new LinearInterpolator());
+        taggingAnimImage.startAnimation(taggingAnim);
+        	
+//        	Calendar c = Calendar.getInstance();
+//        	//c.setTimeInMillis(taggingTime);
+//        	
+//    		String date=DateFormat.format("MMMM dd", c).toString();
+//    		
+//    		if (c.get(c.DAY_OF_MONTH)==1) {
+//    			date+="st";
+//    		}
+//    		else if (c.get(c.DAY_OF_MONTH)==2) {
+//    			date+="nd";
+//    		}
+//    		if (c.get(c.DAY_OF_MONTH)==3) {
+//    			date+="rd";
+//    		}
+//    		else {
+//    			date+="th";
+//    		}
+//    		
+//    		String text=getString(R.string.tagging_previous_time_text);
+//    		if (isPickup)
+//    			text=text.replace("TAGGING_TYPE", getString(R.string.type_pickup));
+//    		else
+//    			text=text.replace("TAGGING_TYPE", getString(R.string.type_dropoff));
+//    		
+//    		text=text.replace("CITY_PLACE_HOLDER", place);
+//    		text=text.replace("DATE_PLACE_HOLDER", "<font color=\"#0089b6\">"+date+"</font>");
+//    		
+//    		previousTagging.setText(Html.fromHtml(text));
+    		
+        
+    }
+    
+    public void taggingTypeClicked(View v) {
+    	int state;
+    	String action;
+    	
+    	if (v.getId()==R.id.dropoff) {
+    		state = App.ACTION_DROP;
+    		action = getString(R.string.dropoff);
+    	}
+    	else if (v.getId()==R.id.pickup_bag) {
+    		state = App.ACTION_PICKUP;
+    		action = getString(R.string.pickup);
+    	}
+    	else {
+    		state = App.ACTION_OTHER;
+    		action = getString(R.string.other);
+    	}
+    	
+    	GoogleAnalyticsTracker tracker = GoogleAnalyticsTracker.getInstance();
+		tracker.startNewSession(getString(R.string.analyticsId), this);
+		tracker.trackEvent(getString(R.string.analytics_tagging), action, getString(R.string.analytics_tag_type), app.isNfcState?Bag.TAG_TYPE_NFC:Bag.TAG_TYPE_QR);
+		tracker.dispatch();
+    	
+    	Intent intent=new Intent(this,TaggingSuccess.class);
+    	intent.putExtra(App.ACTION_EXTRA, state);
+    	intent.putExtras(getIntent());
+		startActivity(intent);
+    }
+    
+    
+}
+

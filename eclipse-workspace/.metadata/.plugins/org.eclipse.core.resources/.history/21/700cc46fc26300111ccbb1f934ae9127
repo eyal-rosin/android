@@ -1,0 +1,11 @@
+package com.tagabag.models;
+
+import java.io.Serializable;
+
+import android.widget.ImageButton;
+
+public class RemovedBag extends OnlineObject implements Serializable, Comparable {
+	public String tagId;	
+	public boolean isSentToServer = false;
+	
+}

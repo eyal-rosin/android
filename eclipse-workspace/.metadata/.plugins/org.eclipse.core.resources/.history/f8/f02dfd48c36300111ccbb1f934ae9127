@@ -1,0 +1,169 @@
+package com.tagabag;
+
+import java.util.List;
+import java.util.Locale;
+
+import android.app.Application;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.location.Address;
+import android.location.Geocoder;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Bundle;
+import android.util.Log;
+
+import com.tagabag.models.Event;
+
+public class App extends Application{
+	final String TAG="app";
+
+	public final static String MAIN_PREFS ="social_networks"; 
+	public final static String FACEBOOK_TOKEN_PREF = "token1";
+	public final static String TWITTER_SECRET_TOKEN_PREF = "twitter_secret_toke";
+	public final static String TWITTER_ACCESS_TOKEN_PREF = "twitter_access_toke";
+	public final static String LINKEDIN_VERIFIER="linkedin_verifier";
+	public final static String LINKEDIN_TOKEN = "linkedin_token";
+	public final static String LINKEDIN_SECRET = "linkedin_secret";
+	public final static String EMAIL_PREF = "email";
+	public final static String PASSWORD_PREF = "password";
+	public final static String NAME_PREF = "name";
+	public final static String SEESSION_ID_PREF = "session_id";
+	public final static String LAST_ADDRESS_PREF = "last_addres";
+
+	public static final int ACTION_UNKNOWN = -1;
+	public static final int ACTION_PICKUP = 0;
+	public static final int ACTION_DROP = 1;	
+	public static final int ACTION_OTHER = 2;
+	public static final int ACTION_PAIR =3;	
+	public static final int ACTION_UNPAIR = 4;
+
+	public static final int STATE_PAIR = 0;
+	public static final int STATE_UNPAIR = 1;
+
+
+	public static final String ACTION_EXTRA = "action_type";
+	public static final String TAG_ID_EXTRA = "tagId";
+	public static final String BAG_EXTRA = "bag";
+	public static final String LOGOUT_EXTRA = "true";
+
+	public boolean isNfcState=true;
+	public int state = ACTION_UNKNOWN;
+
+	public Location mLocation;
+	public Address mAddress;
+
+	private String mSessionId;
+	static App self;
+
+	@Override
+	public void onCreate() {
+		super.onCreate();
+		//getLocation();
+		self = this;
+	}
+
+	public static App getInstance() {
+		return self;
+	}
+
+
+	public void setSessionId(String sessionId) {
+		mSessionId = sessionId;
+	}
+
+	public String getSessionId() {
+
+
+		if (mSessionId==null) {
+			SharedPreferences settings = getSharedPreferences(MAIN_PREFS,0);				
+			mSessionId = settings.getString(SEESSION_ID_PREF, "");
+		}
+
+		return mSessionId;
+
+	}
+
+
+
+	
+	public double getLat() {
+		if (mLocation!=null)
+			return  mLocation.getLatitude();
+		else
+			return -1;
+	}
+
+
+	public double getLon() {
+		if (mLocation!=null)
+			return  mLocation.getLongitude();
+		else
+			return -1;
+	}
+
+
+
+	public void getAddress(final GetAddressListener addressListener) {
+		new Thread() {
+			public void run() {
+				Geocoder myLocation = new Geocoder(getApplicationContext(), Locale.getDefault());
+				List<Address> myList=null;
+				try {
+					myList = myLocation.getFromLocation(mLocation.getLatitude(), mLocation.getLongitude(), 1);
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+				}
+				if (myList!=null && myList.size()!=0) {
+					mAddress = myList.get(0);
+					if (addressListener!=null)
+						addressListener.onAdressReady(mAddress);
+					Log.d(TAG,mAddress.getLocality()+", "+mAddress.getCountryCode()+"("+mLocation.getLatitude()+", "+mLocation.getLongitude()+") ");
+				}
+				else {
+					if (addressListener!=null)
+						addressListener.onAdressFailed();
+				}
+			}
+		}.start();
+	}
+
+
+	public String getEventAddress(Event event) {
+		Geocoder myLocation = new Geocoder(getApplicationContext(), Locale.getDefault());
+		List<Address> myList=null;
+		try {
+			myList = myLocation.getFromLocation(event.lat, event.lon, 1);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		if (myList!=null && myList.size()!=0) {
+			Address address = myList.get(0);
+			if (address.getLocality()!=null && !address.getLocality().equals("null"))
+				return address.getLocality()+", "+address.getCountryName();
+			else
+				return address.getCountryName();
+		}
+
+		return "";
+
+	}
+
+
+	public String getAddressString() {
+		if (mAddress != null) {
+			if (mAddress.getLocality()!=null && !mAddress.getLocality().equals("null"))
+				return mAddress.getLocality()+", "+mAddress.getCountryName();
+			else
+				return mAddress.getCountryName();
+		}
+
+		return "";
+	}
+
+
+}

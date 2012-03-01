@@ -1,0 +1,8 @@
+package com.tagabag;
+
+import android.location.Address;
+
+public interface GetAddressListener {
+	public void onAdressReady(Address address);
+	public void onAdressFailed();
+}

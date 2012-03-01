@@ -1,0 +1,145 @@
+package com.tagabag.activities;
+
+import java.util.List;
+
+import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
+import android.location.Location;
+import android.location.LocationManager;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+
+import com.google.zxing.client.android.db.DataBase;
+import com.tagabag.R;
+import com.tagabag.db.FileManagement;
+import com.tagabag.models.SocialNetworks;
+import com.tagabag.network.ServerConnection;
+
+public class NfcReader extends NfcForegroundDispatchActivity {
+	static final String TAG = "ViewTag";
+	LinearLayout socialNetwordsFrame;
+
+    /**
+     * This activity will finish itself in this amount of time if the user
+     * doesn't do anything.
+     */
+    static final int ACTIVITY_TIMEOUT_MS = 1 * 1000;
+
+    TextView mTitle,centralText;
+    double lat=0, lon=0;
+    //LinearLayout mTagContent;
+    DataBase db;
+    FileManagement fm= new FileManagement(this);
+    SocialNetworks sn;
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.nfc_reader);
+        socialNetwordsFrame=(LinearLayout) findViewById(R.id.social_networds_frame);
+        
+        LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+        List<String> list=locationManager.getProviders(true);
+        String selectedProvider=null;
+        for (String provider:list) {
+        	if (provider!=null) {
+        		selectedProvider=provider;
+        		break;
+        	}
+        }
+        
+        if (selectedProvider!=null) {
+        	Location location=locationManager.getLastKnownLocation (selectedProvider);
+        	if (location!=null) {
+        		lon=location.getLongitude();
+				lat=location.getLatitude();
+        	}
+        }
+        
+        db=new DataBase(this);
+        hexContent=getIntent().getStringExtra("hexContent");
+        mTitle = (TextView) findViewById(R.id.title);
+        centralText = (TextView) findViewById(R.id.central_text);
+        centralText.setText(R.string.read_paired_tag);
+        
+        if (hexContent!=null) {
+        	Cursor c=db.getNfcTagByContentCursor(hexContent);
+        	if (db.getNfcTags(c).length>0) {
+        		centralText.setText(R.string.nfc_reading_own);
+        		socialNetwordsFrame.setVisibility(View.VISIBLE);
+        		
+        		new ServerLuggageFoundThread().start();
+        		
+        		
+        	} else {        	
+        		centralText.setText(R.string.nfc_reading_not_own);   
+        		socialNetwordsFrame.setVisibility(View.GONE);
+        	}
+        }
+        db.close();	        
+    }
+
+    
+    @Override
+    public void setTitle(CharSequence title) {
+        mTitle.setText(title);
+        mTitle.setVisibility(View.VISIBLE);
+    }
+    
+
+    @Override
+    public void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        Cursor c=db.getNfcTagByContentCursor(hexContent);
+    	if (db.getNfcTags(c).length>0) {
+    		centralText.setText(R.string.nfc_reading_own);
+    		new ServerLuggageFoundThread().start();
+    		socialNetwordsFrame.setVisibility(View.VISIBLE);
+    	} else {        	
+    		centralText.setText(R.string.nfc_reading_not_own);
+    		socialNetwordsFrame.setVisibility(View.GONE);
+    	}
+    	//Log.i("Foreground dispatch", "Discovered tag with intent: " + intent);
+        //mText.setText("Discovered tag " + ++mCount + " with intent: " + intent);
+    }
+
+   
+    public void onTwitterClicked(View v) {
+    	if (sn==null)
+    		sn=new SocialNetworks(this);    	
+		
+    }
+    
+    public void onFacebookClicked(View v) {
+    	if (sn==null)
+    		sn=new SocialNetworks(this);
+		sn.getFacebookAuthentication(null);
+    }
+    
+    
+    class ServerLuggageFoundThread extends Thread {
+     	public void run() {
+     		try {
+     			final String s=ServerConnection.setSuccessfulPairing(fm.getInfo(FileManagement.Type.EMAIL), 
+     				ServerConnection.TYPE_NFC,
+     				lat,lon);
+     			/*
+     			mHandler.post(new Runnable() {
+     				public void run() {
+     					Toast.makeText(QrReader.this, s, 1000).show();
+     				}
+     			});
+     			*/ 
+     			
+     			
+     		} catch (Exception e) {
+     			e.printStackTrace();
+     		}
+     	}
+     }
+    
+        
+}
+

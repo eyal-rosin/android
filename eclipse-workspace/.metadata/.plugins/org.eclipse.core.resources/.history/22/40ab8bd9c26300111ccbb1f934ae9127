@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list 
+xmlns:android="http://schemas.android.com/apk/res/android" 
+android:oneshot="false">
+   <item android:drawable="@drawable/searching_00000" android:duration="100" />
+   <item android:drawable="@drawable/searching_00004" android:duration="100" />
+   <item android:drawable="@drawable/searching_00008" android:duration="100" />
+   <item android:drawable="@drawable/searching_00012" android:duration="100" />
+   <item android:drawable="@drawable/searching_00016" android:duration="100" />
+   <item android:drawable="@drawable/searching_00020" android:duration="100" />
+   <item android:drawable="@drawable/searching_00024" android:duration="100" />
+   <item android:drawable="@drawable/searching_00028" android:duration="100" />
+   <item android:drawable="@drawable/searching_00032" android:duration="100" />
+   <item android:drawable="@drawable/searching_00036" android:duration="100" />
+   <item android:drawable="@drawable/searching_00040" android:duration="100" />
+   <item android:drawable="@drawable/searching_00044" android:duration="100" />
+   <item android:drawable="@drawable/searching_00048" android:duration="100" />
+   <item android:drawable="@drawable/searching_00052" android:duration="100" />
+   <item android:drawable="@drawable/searching_00056" android:duration="100" />
+   <item android:drawable="@drawable/searching_00060" android:duration="100" />
+   <item android:drawable="@drawable/searching_00064" android:duration="100" />
+   <item android:drawable="@drawable/searching_00068" android:duration="100" />
+   <item android:drawable="@drawable/searching_00072" android:duration="100" />
+   <item android:drawable="@drawable/searching_00076" android:duration="100" />
+   <item android:drawable="@drawable/searching_00080" android:duration="100" />
+   <item android:drawable="@drawable/searching_00084" android:duration="100" />
+</animation-list>

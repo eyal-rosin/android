@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="@drawable/background"
+    android:gravity="center"
+    android:orientation="vertical" >
+
+    <include
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/header" />
+
+    <ImageView
+        android:id="@+id/taggingAnim"
+        android:layout_width="955.5dp"
+        android:layout_height="52.5dp"
+        android:layout_marginTop="3dp"
+        android:layout_gravity="left"
+        android:background="@drawable/knots_string" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp" >
+
+        <ImageView
+            android:id="@+id/tagItImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:background="@drawable/tag_it" />
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:gravity="center_horizontal|bottom"
+            android:paddingBottom="6dp" >
+
+            <Button
+                android:id="@+id/dropoff"
+                android:layout_width="142dp"
+                android:layout_height="54dp"
+                android:layout_marginRight="3dp"
+                android:background="@drawable/button_empty"
+                android:gravity="center"
+                android:onClick="taggingTypeClicked"
+                android:paddingBottom="7dp"
+                android:text="@string/dropoff"
+                android:textColor="@color/edittext"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/pickup_bag"
+                android:layout_width="142dp"
+                android:layout_height="54dp"
+                android:layout_marginLeft="3dp"
+                android:background="@drawable/button_empty"
+                android:gravity="center"
+                android:onClick="taggingTypeClicked"
+                android:paddingBottom="7dp"
+                android:text="@string/pickup"
+                android:textColor="@color/edittext"
+                android:textSize="18sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal|bottom"
+            android:paddingBottom="12dp" >
+
+            <Button
+                android:id="@+id/other"
+                android:layout_width="142dp"
+                android:layout_height="54dp"
+                android:layout_marginRight="5dp"
+                android:background="@drawable/button_empty"
+                android:gravity="center"
+                android:onClick="taggingTypeClicked"
+                android:paddingBottom="7dp"
+                android:text="@string/other"
+                android:textColor="@color/edittext"
+                android:textSize="18sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+
+        <include layout="@layout/footer" />
+    </FrameLayout>
+
+</LinearLayout>

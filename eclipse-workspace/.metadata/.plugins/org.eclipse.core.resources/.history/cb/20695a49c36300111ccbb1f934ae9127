@@ -1,0 +1,73 @@
+package com.tagabag.models;
+
+import java.io.Serializable;
+
+import android.content.Context;
+import android.util.Log;
+
+import com.tagabag.R;
+
+public class MessageHandler {
+	static String TAG = "message";
+	public static class Message implements Serializable {
+		
+		public Message() {
+			
+		}
+		
+		public String prefix;
+		public String version;
+		public String name;
+		public String luggageDescription;
+		public String email;
+		public String address;
+		public String phone;
+	}
+
+	
+	final static String SEPARATOR="&#%"; 
+	public static String createMessage(Context context, String name, String luggageDescription, String email, String address, String phone) {
+		String placeHolader = context.getString(R.string.tag_place_holder);
+		if (name.equals("")){
+			name =placeHolader;
+		}
+		if (luggageDescription.equals("")){
+			luggageDescription =placeHolader;
+		}
+		if (email.equals("")){
+			email =placeHolader;
+		}
+		if (address.equals("")){
+			address =placeHolader;
+		}
+		if (phone.equals("")){
+			phone =placeHolader;
+		}
+		
+		String s="";
+		s+=context.getString(R.string.tag_prefix)+SEPARATOR;
+		s+=context.getString(R.string.version)+SEPARATOR;
+		s+=name+SEPARATOR;
+		s+=luggageDescription+SEPARATOR;
+		s+=email+SEPARATOR;
+		s+=address+SEPARATOR;
+		s+=phone+SEPARATOR;
+		
+		return s;
+	}
+	
+	public static Message getMessage(String stringMessage) {
+		Message message =  new Message();
+		String[] params = stringMessage.split(SEPARATOR);
+		Log.d(TAG,"s="+stringMessage);
+		message.prefix = params[0];
+		message.version = params[1];		
+		message.name = params[2];
+		message.luggageDescription = params[3];
+		message.email = params[4];
+		message.address = params[5];
+		message.phone = params[6];
+		
+		return message;
+	}
+}

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center"
+    android:background="@drawable/background"
+    >
+	
+    <include
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        layout="@layout/header" />
+    
+    <LinearLayout
+	    android:layout_width="fill_parent"
+	    android:layout_height="fill_parent"	    
+	    android:layout_weight="1"
+	    android:paddingLeft="20dp"
+	    android:paddingRight="20dp"
+	    android:orientation="vertical"	    
+	    android:gravity="center_horizontal"	    	    
+	    >
+	    <LinearLayout
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"	
+		    android:gravity="center"    		    		    	    		    
+		    >		
+			
+			
+			<TextView			  
+			    android:layout_width="wrap_content" 
+			    android:layout_height="wrap_content"		    
+			    android:textColor="@color/tagged"
+			    android:textSize="40sp"
+				android:gravity="center"			    					    		    			    
+			    android:text="@string/tagged"
+			    		    
+			    />
+			<ImageView
+				android:id="@+id/tagItImage"  
+			    android:layout_width="wrap_content" 
+			    android:layout_height="wrap_content"			    
+			    android:background="@drawable/tag"
+			    android:layout_marginLeft="20dp"			    		    
+			    />	 
+			    
+		</LinearLayout>
+		<EditText		
+		    android:id="@+id/thisTagging"	  
+		    android:layout_width="wrap_content" 
+		    android:layout_height="141.5dp"		    
+		    android:textColor="@color/success_text"
+		    android:textSize="18sp"				
+			android:paddingTop="30dp"
+			android:maxLength="140"			
+			android:paddingBottom="20dp"
+			android:paddingLeft="25dp"
+			android:paddingRight="15dp"
+			android:lineSpacingMultiplier="1.3"    					    		    
+		    android:layout_marginTop="10dp"
+		    android:background="@drawable/tagging_success_edittext"
+		    android:text="@string/just_tagged_bag"		    		    
+		    />	 
+		  
+		<LinearLayout
+		    android:layout_width="fill_parent"
+		    android:layout_height="wrap_content"
+		    android:layout_marginTop="10dp"	    		    	    	    		    		       	    
+		    >
+
+		    <CheckBox
+		        android:id="@+id/facebook"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:button="@drawable/facebook"		        
+		        android:paddingBottom="0dp"		        		        
+		        android:layout_weight="1" 		        
+		        />
+	 		
+		    <CheckBox
+		        android:id="@+id/twitter"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:button="@drawable/twitter"		        
+		        android:paddingBottom="0dp"		        		        
+		        android:layout_weight="1" 		        
+		        />
+		    
+		    <CheckBox
+		        android:id="@+id/linkedin"
+		        android:layout_width="wrap_content"
+		        android:layout_height="wrap_content"
+		        android:button="@drawable/linked_in"		        
+		        android:paddingBottom="0dp"		        		        
+		        android:layout_weight="1" 		        
+		        />
+		</LinearLayout>
+		
+		<Button
+		    android:onClick="onShareClicked"
+		    android:layout_width="wrap_content"
+		    android:layout_height="wrap_content"
+		    android:layout_marginTop="20dp"
+		    android:background="@drawable/share_button"		    		    	    		    	    	    		    		       	    
+		    />
+		    
+		
+		    
+	</LinearLayout>	    
+	
+
+	
+</LinearLayout>    
+    
+
