@@ -1,2 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<qualifiedTypeNameHistroy/>
+<qualifiedTypeNameHistroy>
+<fullyQualifiedTypeName name="android.graphics.Paint.Style"/>
+<fullyQualifiedTypeName name="android.hardware.Camera.Size"/>
+<fullyQualifiedTypeName name="com.eyalrosin.solvit.ParabolaActivity"/>
+<fullyQualifiedTypeName name="com.eyalrosin.solvit.DrawGraphActivity"/>
+</qualifiedTypeNameHistroy>

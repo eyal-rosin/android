@@ -126,6 +126,7 @@ public class Client_serverActivity extends ListActivity {
 
                                 // let's build the string array
                                 int i = 0;
+                        
                                 while(tk.hasMoreTokens()) {
                                         responseList[i++] = tk.nextToken();
                                 }
